@@ -1,6 +1,5 @@
-# one2n-sre-bootcamp
+# Milestone 1 - Creating a Simple REST API
 All SRE Bootcamp Progress will be tracked here, goal is to complete the below milestones - with clarity , and implement best practices and production grade setup. 
-
 
 ## Instructions to Run 
 - Coming soon.
@@ -10,19 +9,33 @@ All SRE Bootcamp Progress will be tracked here, goal is to complete the below mi
 - ORM + Database of Choice - SQL Alchemy + SQL Lite
 
 
+## Endpoints that will go live once you run it - 
+- `GET /healthcheck` - returns status as healthy
+- `GET /api/v1/students` - get all students
+- `GET /api/v1/students/<int:id>` - get students by ID
+- `POST /api/v1/students` - insert new student record
+- `PUT /api/v1/students/<int:id>` - update student record by ID
+- `DELETE /api/v1/students/<int:id>` - delete student record by ID
 
 ## Milestone Status 
-- **Underway** - Create a simple REST API Webserver
-- ❌ - Containerise REST API
-- ❌ - Setup one-click local development setup
-- ❌ - Setup a CI pipeline
-- ❌ - Deploy REST API & its dependent services on bare metal
-- ❌ - Setup Kubernetes cluster
-- ❌ - Deploy REST API & its dependent services in K8s
-- ❌ - Deploy REST API & its dependent services using Helm Charts
-- ❌ - Setup one-click deployments using ArgoCD
-- ❌ - Setup an observability stxack
-- ❌ - Configure dashboards & alerts
+**Underway** - Create a simple REST API Webserver
+
+- Create a public repository on GitHub - ✅
+- The repository should contain the following
+- README.md file explaining the purpose of the repo, along with local setup instructions - ✅
+- Explicitly maintaining dependencies in a file ex (requirements.txt and Makefile in our case) - ✅
+- Makefile to build and run the REST API locally. - ❌
+- Ability to run DB schema migrations to create the student table.
+- Config (such as database URL) should not be hard-coded in the code and should be passed through environment variables. - ✅
+- Postman collection for the APIs.
+
+## API expectations
+- Support API versioning (e.g., api/v1/<resource>). - ✅
+- Using proper HTTP verbs for different operations. - ✅
+- API should emit meaningful logs with appropriate log levels. - ✅
+- API should have a /healthcheck endpoint - ✅
+- Unit tests for different endpoints.
+
 
  ✅
  ❌
