@@ -1,83 +1,69 @@
-from flask import Flask, request, jsonify
-import sqlite3
+from flask import Flask, jsonify, request, abort
+from models import db, Student
 
 app = Flask(__name__)
 
-# Database connection function
-def get_db_connection():
-    conn = sqlite3.connect('students.db')
-    conn.row_factory = sqlite3.Row
-    return conn
+# Configure the SQLite database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///students.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Add a new student
-@app.route('/students', methods=['POST'])
-def add_student():
-    data = request.get_json()
-    name = data.get('name')
-    age = data.get('age')
-    grade = data.get('grade')
+# Initialize the database
+db.init_app(app)
 
-    conn = get_db_connection()
-    conn.execute('INSERT INTO students (name, age, grade) VALUES (?, ?, ?)', (name, age, grade))
-    conn.commit()
-    conn.close()
-    return jsonify({'message': 'Student added successfully'}), 201
+# Create the database tables manually when the app starts
+with app.app_context():
+    db.create_all()
 
 # Get all students
 @app.route('/students', methods=['GET'])
 def get_students():
-    conn = get_db_connection()
-    students = conn.execute('SELECT * FROM students').fetchall()
-    conn.close()
+    students = Student.query.all()
+    students_list = [{"id": student.id, "name": student.name, "age": student.age, "course": student.course} for student in students]
+    return jsonify(students_list)
 
-    return jsonify([dict(student) for student in students]), 200
-
-# Get a student by ID
+# Get a single student by ID
 @app.route('/students/<int:id>', methods=['GET'])
 def get_student(id):
-    conn = get_db_connection()
-    student = conn.execute('SELECT * FROM students WHERE id = ?', (id,)).fetchone()
-    conn.close()
-
+    student = Student.query.get(id)
     if student is None:
-        return jsonify({'error': 'Student not found'}), 404
-
-    return jsonify(dict(student)), 200
+        abort(404, description="Student not found")
+    return jsonify({"id": student.id, "name": student.name, "age": student.age, "course": student.course})
 
 # Update student information
 @app.route('/students/<int:id>', methods=['PUT'])
 def update_student(id):
-    data = request.get_json()
-    name = data.get('name')
-    age = data.get('age')
-    grade = data.get('grade')
-
-    conn = get_db_connection()
-    student = conn.execute('SELECT * FROM students WHERE id = ?', (id,)).fetchone()
-
+    student = Student.query.get(id)
     if student is None:
-        return jsonify({'error': 'Student not found'}), 404
+        abort(404, description="Student not found")
 
-    conn.execute('UPDATE students SET name = ?, age = ?, grade = ? WHERE id = ?', (name, age, grade, id))
-    conn.commit()
-    conn.close()
+    data = request.json
+    student.name = data.get('name', student.name)
+    student.age = data.get('age', student.age)
+    student.course = data.get('course', student.course)
 
-    return jsonify({'message': 'Student updated successfully'}), 200
+    db.session.commit()
+    return jsonify({"message": "Student updated successfully"})
 
-# Delete a student record
+# Delete a student
 @app.route('/students/<int:id>', methods=['DELETE'])
 def delete_student(id):
-    conn = get_db_connection()
-    student = conn.execute('SELECT * FROM students WHERE id = ?', (id,)).fetchone()
-
+    student = Student.query.get(id)
     if student is None:
-        return jsonify({'error': 'Student not found'}), 404
+        abort(404, description="Student not found")
 
-    conn.execute('DELETE FROM students WHERE id = ?', (id,))
-    conn.commit()
-    conn.close()
+    db.session.delete(student)
+    db.session.commit()
+    return jsonify({"message": "Student deleted successfully"})
 
-    return jsonify({'message': f'Student with ID {id} has been deleted.'}), 200
+
+@app.route('/healthcheck',methods=['GET'])
+def get_healthcheck():
+    return "API Server is Healthy and Running",200
+
+# Error handler for 404 errors
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({"error": str(error)}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)

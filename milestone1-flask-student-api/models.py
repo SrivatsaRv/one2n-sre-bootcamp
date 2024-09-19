@@ -7,3 +7,6 @@ class Student(db.Model):
     name = db.Column(db.String(100), nullable=False)
     age = db.Column(db.Integer, nullable=False)
     course = db.Column(db.String(100), nullable=False)
+
+    def __repr__(self):
+        return f"<Student {self.name}>"
