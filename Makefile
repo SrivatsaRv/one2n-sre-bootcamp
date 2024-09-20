@@ -26,6 +26,12 @@ check_app_running:
 	@echo "Checking healthcheck status"
 	@curl -f -s -o /dev/null http://127.0.0.1:5000/healthcheck && echo "API is healthy" || (echo "Healthcheck failed"; exit 1)
 
+# Add the target to run tests using pytest
+test:
+	@echo "Running tests"
+	PYTHONPATH=. venv/bin/python -m pytest -v tests/
+
+
 # The 'all' target that runs everything in order
 all: setup_venv install_dependencies start_app check_app_running
 

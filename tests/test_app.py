@@ -1,6 +1,10 @@
 import pytest
+import warnings
 from app import app, db
 from models import Student
+
+# Suppress DeprecationWarnings (such as from Werkzeug)
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 @pytest.fixture
 def client():
@@ -8,14 +12,21 @@ def client():
     app.config['TESTING'] = True  # Enable testing mode
     with app.test_client() as client:
         with app.app_context():
-            # Do not create tables or drop the database, use existing one.
-            yield client  # Return the test client for use in tests
+            db.create_all()  # Ensure the tables are created
+            # Insert some sample student records for testing
+            student1 = Student(name="John Doe", age=22, course="Physics")
+            student2 = Student(name="Jane Doe", age=23, course="Math")
+            db.session.add_all([student1, student2])
+            db.session.commit()
+            yield client
+        db.drop_all()  # Clean up the database after each test
 
 def test_healthcheck(client):
     """Test the /healthcheck endpoint"""
     rv = client.get('/healthcheck')
     assert rv.status_code == 200
-    assert b'"status": "healthy"' in rv.data
+    data = rv.get_json()
+    assert data['status'] == "healthy"
 
 def test_get_all_students(client):
     """Test retrieving all students"""

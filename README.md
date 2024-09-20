@@ -18,16 +18,15 @@ All SRE Bootcamp Progress will be tracked here, goal is to complete the below mi
 - `DELETE /api/v1/students/<int:id>` - delete student record by ID
 
 ## Milestone Status 
-**Underway** - Create a simple REST API Webserver
-
+**Underway** - Create a simple REST API Webserver - - The repository should contain the following
 - Create a public repository on GitHub - ✅
-- The repository should contain the following
+
 - README.md file explaining the purpose of the repo, along with local setup instructions - ✅
 - Explicitly maintaining dependencies in a file ex (requirements.txt and Makefile in our case) - ✅
-- Makefile to build and run the REST API locally. - ❌
-- Ability to run DB schema migrations to create the student table.
+- Makefile to build and run the REST API locally. - - ✅
+- Ability to run DB schema migrations to create the student table. - ✅
 - Config (such as database URL) should not be hard-coded in the code and should be passed through environment variables. - ✅
-- Postman collection for the APIs.
+- Postman collection for the APIs. - ✅
 
 ## API expectations
 - Support API versioning (e.g., api/v1/<resource>). - ✅

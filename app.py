@@ -1,8 +1,14 @@
 import os
 import logging
+import warnings
 from flask import Flask, jsonify, request, abort
+from flask_migrate import Migrate
 from models import db, Student
 from dotenv import load_dotenv
+from sqlalchemy.exc import LegacyAPIWarning
+
+# Suppress SQLAlchemy LegacyAPIWarning
+warnings.filterwarnings("ignore", category=LegacyAPIWarning)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -13,8 +19,9 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///students.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize the database
+# Initialize the database and setup migration object
 db.init_app(app)
+migrate = Migrate(app, db)  # Initialize Flask-Migrate
 
 # Set up logging to both console and file
 logger = logging.getLogger(__name__)
@@ -34,8 +41,8 @@ logger.addHandler(console_handler)
 logger.addHandler(file_handler)
 
 # Create the database tables when the app starts
-with app.app_context():
-    db.create_all()
+#with app.app_context():
+#   db.create_all()
 
 # Healthcheck endpoint
 @app.route('/healthcheck', methods=['GET'])
@@ -55,7 +62,7 @@ def get_students():
 @app.route('/api/v1/students/<int:id>', methods=['GET'])
 def get_student(id):
     logger.info(f"Fetching student with ID: {id}")
-    student = Student.query.get(id)
+    student = db.session.get(Student, id)
     if student is None:
         logger.warning(f"Student with ID {id} not found")
         abort(404, description="Student not found")
@@ -79,7 +86,7 @@ def create_student():
 @app.route('/api/v1/students/<int:id>', methods=['PUT'])
 def update_student(id):
     logger.info(f"Updating student with ID: {id}")
-    student = Student.query.get(id)
+    student = db.session.get(Student, id)
     if student is None:
         logger.warning(f"Student with ID {id} not found for update")
         abort(404, description="Student not found")
@@ -97,7 +104,7 @@ def update_student(id):
 @app.route('/api/v1/students/<int:id>', methods=['DELETE'])
 def delete_student(id):
     logger.info(f"Deleting student with ID: {id}")
-    student = Student.query.get(id)
+    student = db.session.get(Student, id)
     if student is None:
         logger.warning(f"Student with ID {id} not found for deletion")
         abort(404, description="Student not found")
