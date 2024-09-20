@@ -15,25 +15,30 @@ install_dependencies: setup_venv
 	@echo "Installing dependencies"
 	@$(PIP) install -r requirements.txt
 
+# Initialize Alembic (if not already done)
+init_migrations:
+	@if [ ! -d "migrations" ]; then \
+		echo "Initializing Alembic migrations"; \
+		$(PYTHON) -m flask db init; \
+	fi
+
+# Generate migration (to track model changes)
+generate_migration:
+	@echo "Generating Alembic migration"
+	@$(PYTHON) -m flask db migrate -m "Applying schema from models.py"
+
+# Run database migrations (apply migration)
+migrate_db: init_migrations generate_migration
+	@echo "Applying database migrations"
+	@$(PYTHON) -m flask db upgrade
+
 # Start Flask application in the background
-start_app: install_dependencies
+start_app: install_dependencies migrate_db
 	@echo "Starting Flask Application"
 	@$(PYTHON) app.py &
 
-# Check healthcheck endpoint and validate status code
-check_app_running:
-	@sleep 5  # Wait for app to start
-	@echo "Checking healthcheck status"
-	@curl -f -s -o /dev/null http://127.0.0.1:5000/healthcheck && echo "API is healthy" || (echo "Healthcheck failed"; exit 1)
-
-# Add the target to run tests using pytest
-test:
-	@echo "Running tests"
-	PYTHONPATH=. venv/bin/python -m pytest -v tests/
-
-
 # The 'all' target that runs everything in order
-all: setup_venv install_dependencies start_app check_app_running
+all: install_dependencies migrate_db start_app
 
 # Cleanup target to remove virtual environment and generated files
 clean:

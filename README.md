@@ -5,8 +5,8 @@ All SRE Bootcamp Progress will be tracked here, goal is to complete the below mi
 - Coming soon.
 
 ## Tech Stack
-- Code and Framework - Python + Flask
-- ORM + Database of Choice - SQL Alchemy + SQL Lite
+- **Code and Framework** - Python + Flask
+- **ORM + Database + Migration Tool**  - SQL Alchemy + SQLite3 + Alembic 
 
 
 ## Endpoints that will go live once you run it - 
@@ -20,10 +20,9 @@ All SRE Bootcamp Progress will be tracked here, goal is to complete the below mi
 ## Milestone Status 
 **Underway** - Create a simple REST API Webserver - - The repository should contain the following
 - Create a public repository on GitHub - ✅
-
 - README.md file explaining the purpose of the repo, along with local setup instructions - ✅
 - Explicitly maintaining dependencies in a file ex (requirements.txt and Makefile in our case) - ✅
-- Makefile to build and run the REST API locally. - - ✅
+- Makefile to build and run the REST API locally. - ✅
 - Ability to run DB schema migrations to create the student table. - ✅
 - Config (such as database URL) should not be hard-coded in the code and should be passed through environment variables. - ✅
 - Postman collection for the APIs. - ✅
@@ -36,5 +35,7 @@ All SRE Bootcamp Progress will be tracked here, goal is to complete the below mi
 - Unit tests for different endpoints.
 
 
- ✅
- ❌
+## Future improvements - 
+- **Logging Perspective** - If the API server goes down , the app.log file exists - new instance should log to same file. 
+- **SSL Certificate for the HTTP Application** - Install self-signed certificates
+- **Authenticated Requests** - Using a simple auth (Basic Auth on Postman) initially to validate incoming requests, only then serve
