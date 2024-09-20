@@ -1,1 +1,17 @@
-.venv
+# Python Bytecode and Cache Files
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual Environment
+venv/
+
+# Log Files
+*.log
+
+# Database Files
+instance/*.db
+../.env
+
+# System-Specific Files
+.DS_Store
