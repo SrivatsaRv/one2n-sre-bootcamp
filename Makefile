@@ -22,15 +22,15 @@ init_migrations:
 		$(PYTHON) -m flask db init; \
 	fi
 
-# Generate migration (to track model changes)
-generate_migration:
-	@echo "Generating Alembic migration"
-	@$(PYTHON) -m flask db migrate -m "Applying schema from models.py"
-
-# Run database migrations (apply migration)
-migrate_db: init_migrations generate_migration
+# Run database migrations (apply migration if not up-to-date)
+migrate_db: init_migrations
 	@echo "Applying database migrations"
 	@$(PYTHON) -m flask db upgrade
+
+# Generate migration (to track model changes)
+generate_migration: migrate_db
+	@echo "Generating Alembic migration"
+	@$(PYTHON) -m flask db migrate -m "Applying schema from models.py"
 
 # Start Flask application in the background
 start_app: install_dependencies migrate_db

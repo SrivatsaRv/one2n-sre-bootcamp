@@ -2,7 +2,16 @@
 All SRE Bootcamp Progress will be tracked here, goal is to complete the below milestones - with clarity , and implement best practices and production grade setup. 
 
 ## Instructions to Run 
-- Coming soon.
+### Prerequisites
+Make sure you have the following installed on your machine:
+
+- Python 3.12 or higher
+- Make: Install Make
+- pip: Python package manager
+
+### Step 1 - Clone the Repository 
+`git clone <repository-url>`\
+`cd <project-directory>`
 
 ## Tech Stack
 - **Code and Framework** - Python + Flask
@@ -16,6 +25,16 @@ All SRE Bootcamp Progress will be tracked here, goal is to complete the below mi
 - `POST /api/v1/students` - insert new student record
 - `PUT /api/v1/students/<int:id>` - update student record by ID
 - `DELETE /api/v1/students/<int:id>` - delete student record by ID
+
+
+
+## Folder Structure Includes - 
+- `app.py:` Main Flask app file.
+- `models.py:` Schema definitions for the database.
+- `requirements.txt:` List of dependencies.
+- `migrations/:` Alembic migrations folder.
+- `instance/:` Where the SQLite database (students.db) resides.
+- `tests/:` Unit tests, e.g., test_app.py.
 
 ## Milestone Status 
 **Underway** - Create a simple REST API Webserver - - The repository should contain the following
