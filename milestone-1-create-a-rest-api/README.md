@@ -8,8 +8,9 @@ All SRE Bootcamp Progress will be tracked here, goal is to complete the below mi
 Make sure you have the following installed on your machine:
 
 - Python 3.12 or higher
-- Make: Install Make
+- Make: Install Make Tool 
 - pip: Python package manager
+- mysql  Ver 9.0.1
 
 ### Step 1 - Clone the Repository 
 `git clone <repository-url>`\
@@ -17,11 +18,11 @@ Make sure you have the following installed on your machine:
 
 ## Tech Stack
 - **Code and Framework** - Python + Flask
-- **ORM + Database + Migration Tool**  - SQL Alchemy + SQLite3 + Alembic 
+- **ORM + Database + Migration Tool**  - SQL Alchemy + MySQL + Alembic 
 
 
 ## Endpoints that will go live once you run it - 
-- `GET /healthcheck` - returns status as healthy
+- `GET /api/v1/healthcheck` - returns status as healthy
 - `GET /api/v1/students` - get all students
 - `GET /api/v1/students/<int:id>` - get students by ID
 - `POST /api/v1/students` - insert new student record
@@ -35,7 +36,6 @@ Make sure you have the following installed on your machine:
 - `models.py:` Schema definitions for the database.
 - `requirements.txt:` List of dependencies.
 - `migrations/:` Alembic migrations folder.
-- `instance/:` Where the SQLite database (students.db) resides.
 - `tests/:` Unit tests, e.g., test_app.py.
 
 ## Milestone Status 
@@ -53,7 +53,7 @@ Make sure you have the following installed on your machine:
 - Using proper HTTP verbs for different operations. - ✅
 - API should emit meaningful logs with appropriate log levels. - ✅
 - API should have a /healthcheck endpoint - ✅
-- Unit tests for different endpoints.
+- Unit tests for different endpoints - ✅
 
 
 ## Future improvements - 

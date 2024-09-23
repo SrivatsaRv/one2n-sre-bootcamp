@@ -3,10 +3,14 @@ from flask import Flask, request, jsonify
 from models import db, Student
 import os
 from flask_migrate import Migrate
+from dotenv import load_dotenv  # For loading environment variables from .env file
+
+# Load environment variables from the .env file
+load_dotenv()
 
 app = Flask(__name__)
 
-# Configuration
+# Configuration - now using environment variables loaded from the .env file
 DATABASE_URL = os.getenv('DATABASE_URL')
 if not DATABASE_URL:
     raise ValueError("No DATABASE_URL set for Flask application. Set the environment variable before running the app.")
