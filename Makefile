@@ -42,4 +42,4 @@ all: install_dependencies migrate_db start_app
 
 # Cleanup target to remove virtual environment and generated files
 clean:
-	rm -rf $(VENV_DIR) instance/*.db *.log
+	rm -rf $(VENV_DIR) $(INSTANCE_DIR)/*.db *.log $(ENV_FILE) migrations/ __pycache__/ .pytest_cache/
