@@ -18,9 +18,14 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 migrate = Migrate(app, db)
 
-# Logging setup
+# Disable the default werkzeug logger
+log = logging.getLogger('werkzeug')
+log.disabled = True
+
+# Set up logging to file only (disable console output)
 logging.basicConfig(filename='app.log', level=logging.INFO,
-                    format='%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
 logging.info('Application has started.')
 
 # Custom error handler for 404 - Not Found

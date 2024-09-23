@@ -51,6 +51,11 @@ apply_migration:
 	@echo "Applying database migrations"
 	FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=$(DB_URL) $(PYTHON) -m flask db upgrade
 
+# Run tests using pytest
+run_tests:
+	@echo "Running tests"
+	@DATABASE_URL=$(DB_URL) $(PYTHON) -m pytest --disable-warnings
+
 # Start Flask application
 start_app: install_dependencies create_db reset_alembic_version init_migrations generate_migration apply_migration
 	@echo "Starting Flask Application"
@@ -59,10 +64,13 @@ start_app: install_dependencies create_db reset_alembic_version init_migrations 
 # The 'all' target that runs everything in order
 all: install_dependencies create_db reset_alembic_version init_migrations generate_migration apply_migration start_app
 
+# Run tests after all is set up
+test_all: all run_tests
+
 # Cleanup target to remove virtual environment and generated files (but not migrations or instance)
 clean:
 	rm -rf $(VENV_DIR) __pycache__/ .pytest_cache/ *.db *.log
 
 # Full clean, including migrations and instance (use with caution)
 full_clean: clean
-	rm -rf migrations/ instance/
+	rm -rf migrations/
