@@ -1,4 +1,6 @@
 # Milestone 1 - Creating a Simple REST API
+
+<p align="left">
 All SRE Bootcamp Progress will be tracked here, goal is to complete the below milestones - with clarity , and implement best practices and production grade setup. 
 
 ## Instructions to Run 
