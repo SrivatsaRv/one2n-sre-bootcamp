@@ -1,86 +1,80 @@
-import pytest
-import warnings
+import unittest
+import json
 from app import app, db
 from models import Student
 
-# Suppress DeprecationWarnings (such as from Werkzeug)
-warnings.filterwarnings("ignore", category=DeprecationWarning)
+class StudentApiTestCase(unittest.TestCase):
+    
+    def setUp(self):
+        # Setup the test client and configure testing flag
+        self.app = app.test_client()
+        self.app.testing = True
 
-@pytest.fixture
-def client():
-    """Set up the Flask test client for testing."""
-    app.config['TESTING'] = True  # Enable testing mode
-    with app.test_client() as client:
-        with app.app_context():
-            db.create_all()  # Ensure the tables are created
-            # Insert some sample student records for testing
-            student1 = Student(name="John Doe", age=22, course="Physics")
-            student2 = Student(name="Jane Doe", age=23, course="Math")
-            db.session.add_all([student1, student2])
-            db.session.commit()
-            yield client
-        db.drop_all()  # Clean up the database after each test
+        # Create an in-memory SQLite database for testing
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        db.create_all()
 
-def test_healthcheck(client):
-    """Test the /healthcheck endpoint"""
-    rv = client.get('/healthcheck')
-    assert rv.status_code == 200
-    data = rv.get_json()
-    assert data['status'] == "healthy"
+        # Add a sample student for testing
+        self.sample_student = Student(name="John Doe", age=20, grade="A")
+        db.session.add(self.sample_student)
+        db.session.commit()
 
-def test_get_all_students(client):
-    """Test retrieving all students"""
-    rv = client.get('/api/v1/students')
-    assert rv.status_code == 200
-    students = rv.get_json()
-    # Verify that some students exist (adjust if you know how many)
-    assert len(students) > 0
+    def tearDown(self):
+        # Clean up the database after each test
+        db.session.remove()
+        db.drop_all()
 
-def test_get_student_by_id(client):
-    """Test retrieving a student by ID"""
-    rv = client.get('/api/v1/students/1')  # Test with student ID 1
-    assert rv.status_code == 200
-    student = rv.get_json()
-    assert student['id'] == 1
-    assert 'name' in student  # Ensure 'name' field exists
+    # Test /api/v1/healthcheck
+    def test_healthcheck(self):
+        response = self.app.get('/api/v1/healthcheck')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('OK', response.get_data(as_text=True))
 
-def test_create_student(client):
-    """Test creating a new student"""
-    new_student = {
-        "name": "New Student",
-        "age": 22,
-        "course": "Physics"
-    }
-    rv = client.post('/api/v1/students', json=new_student)
-    assert rv.status_code == 201
-    response_data = rv.get_json()
-    assert response_data['message'] == "Student created successfully"
-    assert 'id' in response_data  # New student should have an ID
+    # Test /api/v1/students [GET] - Get all students
+    def test_get_all_students(self):
+        response = self.app.get('/api/v1/students')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.get_data(as_text=True))
+        self.assertEqual(len(data), 1)  # We added one student in setUp
+        self.assertEqual(data[0]['name'], "John Doe")
 
-def test_update_student(client):
-    """Test updating a student's record by ID"""
-    updated_data = {
-        "name": "Updated Student",
-        "age": 23,
-        "course": "Math"
-    }
-    rv = client.put('/api/v1/students/1', json=updated_data)  # Update student with ID 1
-    assert rv.status_code == 200
-    assert b"Student updated successfully" in rv.data
+    # Test /api/v1/students/<id> [GET] - Get a student by ID
+    def test_get_student_by_id(self):
+        response = self.app.get(f'/api/v1/students/{self.sample_student.id}')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.get_data(as_text=True))
+        self.assertEqual(data['name'], "John Doe")
 
-    # Verify the update by fetching the student again
-    rv = client.get('/api/v1/students/1')
-    student = rv.get_json()
-    assert student['name'] == "Updated Student"
-    assert student['age'] == 23
-    assert student['course'] == "Math"
+    # Test /api/v1/students [POST] - Add a new student
+    def test_add_student(self):
+        new_student = {'name': 'Jane Doe', 'age': 22, 'grade': 'B'}
+        response = self.app.post('/api/v1/students', data=json.dumps(new_student), content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.get_data(as_text=True))
+        self.assertEqual(data['message'], 'Student added successfully!')
 
-def test_delete_student(client):
-    """Test deleting a student by ID"""
-    rv = client.delete('/api/v1/students/1')
-    assert rv.status_code == 200
-    assert b"Student deleted successfully" in rv.data
+    # Test /api/v1/students/<id> [PUT] - Update student information
+    def test_update_student(self):
+        update_data = {'name': 'John Updated', 'age': 21, 'grade': 'A+'}
+        response = self.app.put(f'/api/v1/students/{self.sample_student.id}', data=json.dumps(update_data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.get_data(as_text=True))
+        self.assertEqual(data['message'], 'Student updated successfully!')
 
-    # Verify the student is no longer in the database
-    rv = client.get('/api/v1/students/1')
-    assert rv.status_code == 404  # Student with ID 1 should no longer exist
+        # Verify the update
+        updated_student = Student.query.get(self.sample_student.id)
+        self.assertEqual(updated_student.name, 'John Updated')
+
+    # Test /api/v1/students/<id> [DELETE] - Delete a student
+    def test_delete_student(self):
+        response = self.app.delete(f'/api/v1/students/{self.sample_student.id}')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.get_data(as_text=True))
+        self.assertEqual(data['message'], 'Student deleted successfully!')
+
+        # Verify the student is actually deleted
+        deleted_student = Student.query.get(self.sample_student.id)
+        self.assertIsNone(deleted_student)
+
+if __name__ == '__main__':
+    unittest.main()

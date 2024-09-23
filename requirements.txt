@@ -3,3 +3,4 @@ Flask-SQLAlchemy==3.0.3
 python-dotenv==1.0.1
 pytest==8.3.3
 Flask-Migrate==4.0.7
+mysqlclient==2.2.4  # Use this or pymysql if there are compatibility issues
