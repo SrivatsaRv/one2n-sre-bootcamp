@@ -12,14 +12,14 @@ class StudentApiTestCase(unittest.TestCase):
         cls.client = app.test_client()
 
     def setUp(self):
-        # Ensure the app uses the MySQL database for tests
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://youruser:yourpassword@localhost/student_db'
+        # Ensure the app uses the MySQL test database, not the production database
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://youruser:yourpassword@localhost/test_student_db'
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-        # Clean up the database before each test
+        # Clean up the test database before each test
         with app.app_context():
             db.session.remove()
-            db.drop_all()
+            db.drop_all()  # Only drops the test database
             db.create_all()
 
             # Insert a sample student for testing
@@ -28,7 +28,7 @@ class StudentApiTestCase(unittest.TestCase):
             db.session.commit()
 
     def tearDown(self):
-        # Clean up the database after each test
+        # Clean up the test database after each test
         with app.app_context():
             db.session.remove()
             db.drop_all()

@@ -7,6 +7,7 @@ class Student(db.Model):
     name = db.Column(db.String(100), nullable=False)
     age = db.Column(db.Integer, nullable=False)
     grade = db.Column(db.String(20), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique=True)  # New email field
 
     def __repr__(self):
         return f"<Student {self.name}>"
