@@ -2,6 +2,11 @@ import unittest
 import json
 from app import app, db
 from models import Student
+import os
+from dotenv import load_dotenv  # Load environment variables
+
+# Load environment variables from .env
+load_dotenv()
 
 class StudentApiTestCase(unittest.TestCase):
 
@@ -13,7 +18,7 @@ class StudentApiTestCase(unittest.TestCase):
 
     def setUp(self):
         # Ensure the app uses the MySQL test database, not the production database
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://youruser:yourpassword@localhost/test_student_db'
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('TEST_DB_URL')
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
         # Clean up the test database before each test
