@@ -56,30 +56,48 @@ class Student(db.Model):
     def __repr__(self):
         return f"<Student {self.name}>"
 ```
-**Step 3** - Generate an Alembic Migration File and Apply that Migration to Database so it can Reflect
+**Step 3** - Generate an Alembic Migration File
+
 ```
-$ make generate_migration
+$ make generate_migration  #This runs flask db migrate -m "Initial migration"
 
 Generating Alembic migration
-FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=mysql://<user-name>:<password>@localhost/student_db   venv/bin/python -m flask db migrate -m "Added email field"
+FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=mysql://youruser:yourpassword@localhost/student_db   venv/bin/python -m flask db migrate -m "Schema changes"
 INFO  [alembic.runtime.migration] Context impl MySQLImpl.
 INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
 INFO  [alembic.autogenerate.compare] Detected added column 'student.email'
-INFO  [alembic.autogenerate.compare] Detected added unique constraint None on '('email',)'
-  Generating /Users/admin/one2n-sre-bootcamp/milestone-1-create-a-rest-api/migrations/versions/bda7ffb0de7d_added_email_field.py ...  done
+  Generating /Users/admin/one2n-sre-bootcamp/milestone-1-create-a-rest-api/migrations/versions/cba53257b046_schema_changes.py ...  done
 
+```
 
+**Step 4** - Apply that Migration to Database so it can Reflect
 
-make generate_migration   #This runs flask db migrate -m "Initial migration"
+```
+$make apply_migration   #This runs flask db upgrade 
 
-
-
-make apply_migration      #This runs flask db upgrade
+Applying database migrations
+FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=mysql://youruser:yourpassword@localhost/student_db   venv/bin/python -m flask db upgrade
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> cba53257b046, Schema changes
 
 ```
 **Step 4** - Verify the Database is now Showing Updated Schema for Student Table
 ```
-mysql -u youruser -p -e "USE student_db; DESCRIBE student;"
+>mysql USE student_db; 
+>mysql DESCRIBE student;"
+
+mysql> describe student;
++-------+--------------+------+-----+---------+----------------+
+| Field | Type         | Null | Key | Default | Extra          |
++-------+--------------+------+-----+---------+----------------+
+| id    | int          | NO   | PRI | NULL    | auto_increment |
+| name  | varchar(100) | NO   |     | NULL    |                |
+| age   | int          | NO   |     | NULL    |                |
+| grade | varchar(20)  | NO   |     | NULL    |                |
+| email | varchar(120) | NO   |     | NULL    |                |
++-------+--------------+------+-----+---------+----------------+
+
 ```
 
 

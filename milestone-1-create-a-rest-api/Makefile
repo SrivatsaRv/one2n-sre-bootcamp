@@ -51,17 +51,22 @@ init_migrations: check_mysql
 	@if [ ! -d "migrations" ]; then \
 		echo "Initializing Alembic migrations"; \
 		FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=$(DB_URL) $(PYTHON) -m flask db init; \
+		echo "Generating and applying initial migration for student table"; \
+		FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=$(DB_URL) $(PYTHON) -m flask db migrate -m "Initial commit: Create student table"; \
+		FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=$(DB_URL) $(PYTHON) -m flask db upgrade; \
 	fi
 
 # Generate migration based on models.py schema (tracks changes in schema)
 generate_migration: check_mysql
 	@echo "Generating Alembic migration"
-	FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=$(DB_URL) $(PYTHON) -m flask db migrate -m "Added email field"
+	FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=$(DB_URL) $(PYTHON) -m flask db migrate -m "Schema changes"
 
 # Apply database migrations (runs upgrade)
 apply_migration: check_mysql
 	@echo "Applying database migrations"
 	FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=$(DB_URL) $(PYTHON) -m flask db upgrade
+
+
 
 # Start Flask application
 start_app: install_dependencies create_db reset_alembic_version init_migrations generate_migration apply_migration
