@@ -1,14 +1,12 @@
-# Milestone 1 - Creating a Simple REST API
-All SRE Bootcamp Progress will be tracked here, goal is to complete the below milestones - with clarity , and implement best practices and production grade setup. 
+# Milestone 2 - Containerizing the REST API
 
-## Instructions to Run 
 ### Prerequisites
 Make sure you have the following installed on your machine:
-
+- Docker version 27.1.1 or equivalent 
 - Python 3.12 or higher
 - Make: Install Make Tool 
-- pip: Python package manager
-- MySQL - Version 9.0.1 or lower
+- pip3: Python package manager
+- Requirements.txt file - (especially flask)
 
 ### Step 1 - Clone the Repository 
 ```
@@ -33,10 +31,10 @@ python3 -m flask db migrate -m "Creating table from models.py schema file"  #gen
 python3 -m flask db upgrade    # Propogates the changes from models.py source code -> database container
 ```
 
-### Step 4 - Run `make all`
-
-
-
+### Step 4 - Run the final Make command 
+```
+make all
+```
 
 ## Tech Stack
 - **Code and Framework** - Python + Flask
