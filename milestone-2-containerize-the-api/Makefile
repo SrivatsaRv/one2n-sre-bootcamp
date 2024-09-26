@@ -1,93 +1,110 @@
-# Variables
-VENV_DIR = venv
-PYTHON = $(VENV_DIR)/bin/python
-PIP = $(VENV_DIR)/bin/pip
-DB_URL = mysql://$(MYSQL_USER):$(MYSQL_PASSWORD)@localhost/$(MYSQL_DATABASE)
-MYSQL_ROOT_USER = root
-MYSQL_ROOT_PASSWORD = ''  # Set your MySQL root password here if necessary
-MYSQL_DATABASE = student_db
-MYSQL_USER = youruser
-MYSQL_PASSWORD = yourpassword
-TEST_DB_URL = mysql://$(MYSQL_USER):$(MYSQL_PASSWORD)@localhost/test_student_db
+# Load environment variables from .env file
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+endif
 
-# Setup virtual environment only if it doesn't already exist
-setup_venv:
-	@if [ ! -d "$(VENV_DIR)" ]; then \
-		echo "Setting up virtual environment"; \
-		python3 -m venv $(VENV_DIR); \
+# Variables for Docker operations
+IMAGE_NAME = flask-app
+SQL_CONTAINER_NAME = mysql_container   # This is the name of the container
+SQL_IMAGE = mysql:8.0                  # This is the image to use for MySQL
+DB_VOLUME = mysql_data
+TAG = 1.0.0
+
+# Build the Docker image with semver tagging
+build:
+	@echo "Building Docker image with tag $(TAG)"
+	@docker build -t $(IMAGE_NAME):$(TAG) .
+
+# Run the MySQL container with volume persistence
+run_db:
+	@echo "Starting MySQL container with volume"
+	@docker volume create $(DB_VOLUME)
+	@docker run --name $(SQL_CONTAINER_NAME) -v $(DB_VOLUME):/var/lib/mysql \
+	    -e MYSQL_ROOT_PASSWORD=$(MYSQL_ROOT_PASSWORD) \
+	    -e MYSQL_DATABASE=$(MYSQL_DATABASE) \
+	    -e MYSQL_USER=$(MYSQL_USER) \
+	    -e MYSQL_PASSWORD=$(MYSQL_PASSWORD) \
+	    -d $(SQL_IMAGE)
+
+# Wait for the MySQL container to be ready
+wait_for_db:
+	@echo "Waiting for MySQL to be ready..."
+	@until docker exec -i $(SQL_CONTAINER_NAME) mysql -u$(MYSQL_ROOT_USER) -p$(MYSQL_ROOT_PASSWORD) -e "SHOW DATABASES;" > /dev/null 2>&1; do \
+	    echo "Waiting for database connection..."; \
+	    sleep 3; \
+	done
+
+# Start the Flask app container only if it's not already running
+start_flask_if_needed:
+	@if ! docker ps -q --filter "name=flask-app"; then \
+		echo "Starting Flask container"; \
+		docker run -d --name flask-app --env-file .env -p 5000:5000 $(IMAGE_NAME):$(TAG); \
+		sleep 5; \
+		if ! docker ps -q --filter "name=flask-app"; then \
+			echo "Error: Flask container failed to start"; \
+			docker logs flask-app; \
+			exit 1; \
+		fi; \
+	else \
+		echo "Flask container is already running"; \
 	fi
 
-# Install dependencies inside the virtual environment
-install_dependencies: setup_venv
-	@echo "Installing dependencies"
-	@$(PIP) install -r requirements.txt
-
-# Check if MySQL is installed
-check_mysql:
-	@if ! command -v mysql &> /dev/null; then \
-		echo "Error: MySQL is not installed. Please install MySQL and try again."; \
+# Initialize Alembic migrations (if not already done)
+init_migrations:
+	@echo "Initializing Alembic migrations (if not already done)"
+	@if docker ps -q --filter "name=flask-app"; then \
+		if ! docker exec flask-app test -d "migrations"; then \
+			echo "Initializing Alembic migrations"; \
+			docker exec flask-app bash -c "FLASK_APP=app.py python3 -m flask db init"; \
+			echo "Generating and applying initial migration for student table"; \
+			docker exec flask-app bash -c "FLASK_APP=app.py python3 -m flask db migrate -m 'Initial commit: Create student table'"; \
+			docker exec flask-app bash -c "FLASK_APP=app.py python3 -m flask db upgrade"; \
+		fi \
+	else \
+		echo "Error: flask-app container not running"; \
 		exit 1; \
 	fi
 
-# Create MySQL production and test databases if they don't exist
-create_db: check_mysql
-	@echo "Creating MySQL production and test databases"
-	@mysql -u $(MYSQL_ROOT_USER) --password=$(MYSQL_ROOT_PASSWORD) -e "CREATE DATABASE IF NOT EXISTS $(MYSQL_DATABASE);"
-	@mysql -u $(MYSQL_ROOT_USER) --password=$(MYSQL_ROOT_PASSWORD) -e "CREATE DATABASE IF NOT EXISTS test_student_db;"
-	@mysql -u $(MYSQL_ROOT_USER) --password=$(MYSQL_ROOT_PASSWORD) -e "CREATE USER IF NOT EXISTS '$(MYSQL_USER)'@'localhost' IDENTIFIED BY '$(MYSQL_PASSWORD)';"
-	@mysql -u $(MYSQL_ROOT_USER) --password=$(MYSQL_ROOT_PASSWORD) -e "GRANT ALL PRIVILEGES ON $(MYSQL_DATABASE).* TO '$(MYSQL_USER)'@'localhost';"
-	@mysql -u $(MYSQL_ROOT_USER) --password=$(MYSQL_ROOT_PASSWORD) -e "GRANT ALL PRIVILEGES ON test_student_db.* TO '$(MYSQL_USER)'@'localhost';"
-	@mysql -u $(MYSQL_ROOT_USER) --password=$(MYSQL_ROOT_PASSWORD) -e "FLUSH PRIVILEGES;"
-
-# Reset the Alembic version table in MySQL (if it exists)
-reset_alembic_version: check_mysql
-	@echo "Resetting Alembic version in the production database"
-	@mysql -u $(MYSQL_ROOT_USER) --password=$(MYSQL_ROOT_PASSWORD) -e "USE $(MYSQL_DATABASE); DROP TABLE IF EXISTS alembic_version;"
-
-# Initialize Alembic (if not already done)
-init_migrations: check_mysql
-	@if [ ! -d "migrations" ]; then \
-		echo "Initializing Alembic migrations"; \
-		FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=$(DB_URL) $(PYTHON) -m flask db init; \
+# Apply database migrations (runs upgrade)
+apply_migration:
+	@echo "Applying database migrations"
+	@if docker ps -q --filter "name=flask-app"; then \
+		docker exec flask-app bash -c "FLASK_APP=app.py python3 -m flask db upgrade"; \
+	else \
+		echo "Error: flask-app container not running"; \
+		exit 1; \
 	fi
 
-# Generate migration based on models.py schema (tracks changes in schema)
-generate_migration: check_mysql
-	@echo "Generating Alembic migration"
-	FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=$(DB_URL) $(PYTHON) -m flask db migrate -m "Initial migration"
-
-# Apply database migrations (runs upgrade)
-apply_migration: check_mysql
-	@echo "Applying database migrations"
-	FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=$(DB_URL) $(PYTHON) -m flask db upgrade
-
-# Start Flask application
-start_app: install_dependencies create_db reset_alembic_version init_migrations generate_migration apply_migration
-	@echo "Starting Flask Application"
-	FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=$(DB_URL) $(PYTHON) app.py
-
-# Resume Flask application without setup (useful for restarting the server after it has already been set up)
-resume_flask:
-	@echo "Resuming Flask Application"
-	FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=$(DB_URL) $(PYTHON) app.py
-
-# Create MySQL test database if it doesn't exist
-create_test_db: check_mysql
-	@echo "Creating MySQL test database"
-	@mysql -u $(MYSQL_ROOT_USER) --password=$(MYSQL_ROOT_PASSWORD) -e "CREATE DATABASE IF NOT EXISTS test_student_db;"
-
-# Run tests using pytest and ensure test database exists
-run_tests: create_test_db
-	@echo "Running tests"
-	FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=$(TEST_DB_URL) $(PYTHON) -m pytest --disable-warnings
-
-# The 'all' target that runs everything in order
-all: install_dependencies check_mysql create_db reset_alembic_version init_migrations generate_migration apply_migration start_app
-
-# Cleanup target to remove virtual environment and generated files (but not migrations)
+# Clean up containers and volumes efficiently
 clean:
-	rm -rf $(VENV_DIR) __pycache__/ .pytest_cache__/ *.db *.log
+	@echo "Stopping and removing containers if they exist..."
+	@if docker ps -q --filter "name=flask-app"; then \
+		docker stop flask-app && docker rm -f flask-app; \
+	else \
+		echo "flask-app container does not exist."; \
+	fi
+	@if docker ps -q --filter "name=$(SQL_CONTAINER_NAME)"; then \
+		docker stop $(SQL_CONTAINER_NAME) && docker rm -f $(SQL_CONTAINER_NAME); \
+	else \
+		echo "$(SQL_CONTAINER_NAME) container does not exist."; \
+	fi
+	@echo "Removing Docker volume if it exists..."
+	@if docker volume ls -q --filter "name=$(DB_VOLUME)"; then \
+		docker volume rm -f $(DB_VOLUME); \
+	else \
+		echo "$(DB_VOLUME) volume does not exist."; \
+	fi
 
-# Full clean, including migrations (use with caution)
+# Full clean target (removes Docker containers and volumes)
 full_clean: clean
-	rm -rf migrations/
+	@echo "Removing all Docker images built by this project..."
+	@if docker images -q $(IMAGE_NAME):$(TAG); then \
+		docker rmi $(IMAGE_NAME):$(TAG); \
+	else \
+		echo "$(IMAGE_NAME) image does not exist."; \
+	fi
+
+# Default target that builds the image, runs the database, and applies schema
+all: build run_db wait_for_db start_flask_if_needed init_migrations apply_migration
+	@echo "All steps completed."
