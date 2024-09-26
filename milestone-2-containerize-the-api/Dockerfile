@@ -1,36 +1,48 @@
-# Stage 1: Build the application in a lightweight Python image
-FROM python:3.12-slim AS build-stage
+# Stage 1: Build stage
+FROM python:3.9-slim AS build-stage
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1 \  
-    PIP_NO_CACHE_DIR=1 
+# Install system dependencies for mysqlclient and other needed libraries
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    default-libmysqlclient-dev \
+    build-essential \
+    libffi-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 
-# Create and set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the requirements.txt and install the dependencies
+# Copy only the requirements.txt file into the container
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the application source code into the container
-COPY . .
+# Install Python dependencies using pip3
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Stage 2: Use a minimal image for running the app
-FROM python:3.12-alpine AS runtime-stage
+# Stage 2: Final stage (runtime environment)
+FROM python:3.9-slim
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+# Install the runtime dependency for mysqlclient
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    default-libmysqlclient-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Create and set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the installed dependencies and source code from the build stage
-COPY --from=build-stage /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY --from=build-stage /app /app
+# Copy the installed Python dependencies from the build stage
+COPY --from=build-stage /usr/local/lib/python3.9 /usr/local/lib/python3.9
 
-# Expose port 5000 for Flask
+# Copy only necessary files from the host to the container (app.py, models.py, and .env)
+COPY app.py app.py
+COPY models.py models.py
+COPY .env .env
+
+# Expose the Flask port
 EXPOSE 5000
 
-# Set the default command to run the Flask app
-CMD ["flask", "run", "--host=0.0.0.0"]
+# Ensure environment variables are loaded
+ENV FLASK_APP=app.py
+
+# Set the default command to run the Flask app with python3 -m flask run
+CMD ["python3", "-m", "flask", "run", "--host=0.0.0.0", "--port=5000"]

@@ -20,25 +20,84 @@ Make sure you have the following installed on your machine:
 ### Step 3 - Run Unit Tests for API 
 `/one2n-sre-bootcamp/milestone-1-create-a-rest-api - make run_tests` - All tests will pass here
 
-### Step 4 - Test Schema Migraiton with Alembic Tracking Changes
-- We will carry out the following actions in the code block below , ensure flask is running
 
+## Test Schema Migraiton with Alembic Tracking Changes
+- We will carry out the following actions in the code block below , ensure flask is running
+- Output from a demo carried out , is also attached so you can validate 
+
+
+**Step 1** - Verify your schema before changing anything 
 ```
 mysql -u youruser -p -e "USE student_db; DESCRIBE student;"
+mysql> describe student;
++-------+--------------+------+-----+---------+----------------+
+| Field | Type         | Null | Key | Default | Extra          |
++-------+--------------+------+-----+---------+----------------+
+| id    | int          | NO   | PRI | NULL    | auto_increment |
+| name  | varchar(100) | NO   |     | NULL    |                |
+| age   | int          | NO   |     | NULL    |                |
+| grade | varchar(20)  | NO   |     | NULL    |                |
++-------+--------------+------+-----+---------+----------------+
+```
 
+**Step 2** - Replace your models.py file with below - this will simluate a schema change ( 1 new field )
+```
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
 
 class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     age = db.Column(db.Integer, nullable=False)
-    grade = db.Column(db.String(10), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)  # New email field added here
+    grade = db.Column(db.String(20), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique=True)  # New email field
 
-flask db migrate -m "Add email field to Student" 
+    def __repr__(self):
+        return f"<Student {self.name}>"
+```
+**Step 3** - Generate an Alembic Migration File
 
-flask db upgrade
+```
+$ make generate_migration  #This runs flask db migrate -m "Initial migration"
 
-mysql -u youruser -p -e "USE student_db; DESCRIBE student;"
+Generating Alembic migration
+FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=mysql://youruser:yourpassword@localhost/student_db   venv/bin/python -m flask db migrate -m "Schema changes"
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.autogenerate.compare] Detected added column 'student.email'
+  Generating /Users/admin/one2n-sre-bootcamp/milestone-1-create-a-rest-api/migrations/versions/cba53257b046_schema_changes.py ...  done
+
+```
+
+**Step 4** - Apply that Migration to Database so it can Reflect
+
+```
+$make apply_migration   #This runs flask db upgrade 
+
+Applying database migrations
+FLASK_APP=app.py FLASK_ENV=development DATABASE_URL=mysql://youruser:yourpassword@localhost/student_db   venv/bin/python -m flask db upgrade
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> cba53257b046, Schema changes
+
+```
+**Step 4** - Verify the Database is now Showing Updated Schema for Student Table
+```
+>mysql USE student_db; 
+>mysql DESCRIBE student;"
+
+mysql> describe student;
++-------+--------------+------+-----+---------+----------------+
+| Field | Type         | Null | Key | Default | Extra          |
++-------+--------------+------+-----+---------+----------------+
+| id    | int          | NO   | PRI | NULL    | auto_increment |
+| name  | varchar(100) | NO   |     | NULL    |                |
+| age   | int          | NO   |     | NULL    |                |
+| grade | varchar(20)  | NO   |     | NULL    |                |
+| email | varchar(120) | NO   |     | NULL    |                |
++-------+--------------+------+-----+---------+----------------+
+
 ```
 
 

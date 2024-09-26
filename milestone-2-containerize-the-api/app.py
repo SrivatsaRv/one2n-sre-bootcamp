@@ -10,7 +10,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Configuration - now using environment variables loaded from the .env file
+# Configuration using environment variables
 DATABASE_URL = os.getenv('DATABASE_URL')
 if not DATABASE_URL:
     raise ValueError("No DATABASE_URL set for Flask application. Set the environment variable before running the app.")
@@ -109,4 +109,4 @@ def healthcheck():
 
 if __name__ == '__main__':
     logging.info('Starting the Flask application...')
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
