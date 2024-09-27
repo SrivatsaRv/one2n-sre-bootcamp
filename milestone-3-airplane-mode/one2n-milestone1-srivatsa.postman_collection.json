@@ -1,0 +1,191 @@
+{
+	"info": {
+		"_postman_id": "90026f81-8bb0-4a88-88d4-6933dc498aa1",
+		"name": "one2n-milestone1-srivatsa",
+		"description": "This Postman collection has been setup , to verify HTTP REST API capabilities of the repository we have built - linked here -\n\n- A simple Flask-Python HTTP Webserver , that serves a student database with CRUD facility\n    \n\n[https://github.com/SrivatsaRv/one2n-sre-bootcamp](https://github.com/SrivatsaRv/one2n-sre-bootcamp)\n\n- Use this collection to verify all our endpoints , and their functionality.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38476295"
+	},
+	"item": [
+		{
+			"name": "Health Check Endpoint",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/v1/healthcheck",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"healthcheck"
+					]
+				},
+				"description": "A simple /healthcheck endpoint , this is to primarily validate the functioning of the API service by flask itself. Returns a simple 200 code when hit , does not perform any deep checks."
+			},
+			"response": []
+		},
+		{
+			"name": "Insert New Student Record",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"John Doe\",\n    \"age\": 20,\n    \"grade\": \"A\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/v1/students/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"students",
+						""
+					]
+				},
+				"description": "POST request to insert records into the database sequentially, the database is setup for auto-increment of the primary key attribute , so feel free to hit this as many times as possible. And the database will handle this.\n\nPOST Body - raw(josn) is required, with an example given below:\n\n{  \n\"name\": \"\",  \n\"age\": ,  \n\"course\": \"\"  \n}"
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Student Records",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/v1/students",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"students"
+					]
+				},
+				"description": "By default , we do not have student records when you clone and run the setup , but you have a POST to insert new records. If you would like that i, post which you can get all student records in JSON format."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Student Record By ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/v1/students/{{id}}",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"students",
+						"{{id}}"
+					]
+				},
+				"description": "We are using primary key with auto-incremented integer values as per schema , so you can do\n\n[http://127.0.0.1:5000/api/v1/students/](http://127.0.0.1:5000/api/v1/students/%3Cid%3E) and fetch selective details."
+			},
+			"response": []
+		},
+		{
+			"name": "Update Student Record by ID",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Srivatsa\",\n    \"age\": 30,\n    \"grade\": \"B\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/v1/students/1",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"students",
+						"1"
+					]
+				},
+				"description": "Put is an in-place update of an existing record , if the record exists - we will update it , if it does not - the API will give you the error -"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Student Record by ID",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/v1/students/<id>",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"students",
+						"<id>"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
