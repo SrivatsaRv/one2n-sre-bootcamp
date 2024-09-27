@@ -17,6 +17,3 @@ instance/*.db
 
 # System-Specific Files
 .DS_Store
-
-# Migrations DB Files
-migrations/

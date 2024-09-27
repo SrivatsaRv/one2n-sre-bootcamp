@@ -17,21 +17,30 @@ cd one2n-sre-bootcamp/milestone-2-containerize-the-api
 ### Step 2 - Setup your Local Venv (trust me , you need this)
 
 ```
-python3 -m venv venv
+make venv_setup   #activates a venv to download a few dependencies
 source venv/bin/activate
-pip3 install -r requirements.txt
-python3 -m flask --version
-python3 -m alembic --version
+
 ```
 
-### Step 3 - Prepare for Migration Capability (Used for applying schema when DB comes up)
+### Step 3 - Bring up Database Container
 ```
-python3 -m flask db init   #initialize Alembic Migration Directory
-python3 -m flask db migrate -m "Creating table from models.py schema file"  #generates migration file
-python3 -m flask db upgrade    # Propogates the changes from models.py source code -> database container
+$make run_db   # your db container should be up by now and running (db created , schema yet to be applied)
 ```
 
-### Step 4 - Run the final Make command 
+### Step 4 - Initialize Alembic Directory and Generate a Migration File
+```
+$make init_migrations   #initiates alembic , and brings up migrations/ folder
+
+$make generate_migration   # generates the schema migration file , can be applied to database
+```
+
+### Step 5 - Apply the Migration to Database
+```
+$make apply migration    #applies the action items in schema migration file
+$make verify_db    #prints table schema for student table , in student_db database
+```
+
+### Step 6 - Bring up Flask Application Container
 ```
 make all
 ```

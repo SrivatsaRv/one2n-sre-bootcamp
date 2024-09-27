@@ -33,10 +33,11 @@ WORKDIR /app
 # Copy the installed Python dependencies from the build stage
 COPY --from=build-stage /usr/local/lib/python3.9 /usr/local/lib/python3.9
 
-# Copy only necessary files from the host to the container (app.py, models.py, and .env)
-COPY app.py app.py
-COPY models.py models.py
-COPY .env .env
+# Copy necessary files from the host to the container
+COPY app.py models.py .env ./
+
+# Copy the migrations folder (ensure it exists locally)
+COPY migrations/ /app/migrations/
 
 # Expose the Flask port
 EXPOSE 5000
@@ -44,5 +45,5 @@ EXPOSE 5000
 # Ensure environment variables are loaded
 ENV FLASK_APP=app.py
 
-# Set the default command to run the Flask app with python3 -m flask run
+# Set the default command to run the Flask app
 CMD ["python3", "-m", "flask", "run", "--host=0.0.0.0", "--port=5000"]
