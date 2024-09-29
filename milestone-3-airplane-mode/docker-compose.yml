@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_container
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql  # Use custom volume name
+    networks:
+      - app_network  # Use custom network name
+
+  api:
+    build:
+      context: .  # Use the current directory to build
+      dockerfile: Dockerfile  # Build the Flask API from your Dockerfile
+    image: flask-api:${API_VERSION}  # The version is controlled from Makefile
+    container_name: flask_api
+    environment:
+      FLASK_APP: app.py
+      DATABASE_URL_CONTAINER: ${DATABASE_URL_CONTAINER}  # Container-specific DB URL
+      MIGRATIONS: "false"  # Flag for running migrations
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mysql  # Ensure MySQL starts before the API
+    networks:
+      - app_network  # Use custom network name
+
+volumes:
+  mysql_data:
+    name: mysql_data  # Custom volume name
+
+networks:
+  app_network:
+    name: app_network  # Custom network name
