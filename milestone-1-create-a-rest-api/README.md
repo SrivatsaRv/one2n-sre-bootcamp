@@ -11,11 +11,19 @@ Make sure you have the following installed on your machine:
 - MySQL - Version 9.0.1 or lower
 
 ### Step 1 - Clone the Repository 
-`git clone https://github.com/SrivatsaRv/one2n-sre-bootcamp.git`\
-`cd one2n-sre-bootcamp/milestone-1-create-a-rest-api`
+```
+git clone https://github.com/SrivatsaRv/one2n-sre-bootcamp.git`\
 
-### Step 2 - Run Make Command to Setup Webserver
-`/one2n-sre-bootcamp/milestone-1-create-a-rest-api - make all` - Wait for server to come up
+cd one2n-sre-bootcamp/milestone-1-create-a-rest-api`
+```
+
+### Step 2 - Run Make Command to Setup Webserver and Apply Latest Migrations as it comes up
+```
+/one2n-sre-bootcamp/milestone-1-create-a-rest-api - make setup_venv - Setup your venv 
+/one2n-sre-bootcamp/milestone-1-create-a-rest-api - source venv/bin/activate  - Activate the venv
+
+$make all   - Runs everything , that applies migrations, and also runs the Flask server
+```
 
 ### Step 3 - Run Unit Tests for API 
 `/one2n-sre-bootcamp/milestone-1-create-a-rest-api - make run_tests` - All tests will pass here
@@ -51,7 +59,7 @@ class Student(db.Model):
     name = db.Column(db.String(100), nullable=False)
     age = db.Column(db.Integer, nullable=False)
     grade = db.Column(db.String(20), nullable=False)
-    email = db.Column(db.String(120), nullable=False, unique=True)  # New email field
+    email = db.Column(db.String(120), nullable=False)  # New email field
 
     def __repr__(self):
         return f"<Student {self.name}>"
