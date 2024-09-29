@@ -10,14 +10,31 @@ Make sure you have the following installed on your machine:
 - pip: Python package manager
 - MySQL - Version 9.0.1 or lower
 
+
 ### Step 1 - Clone the Repository 
 ```
 git clone https://github.com/SrivatsaRv/one2n-sre-bootcamp.git`\
 
 cd one2n-sre-bootcamp/milestone-1-create-a-rest-api`
+
 ```
 
-### Step 2 - Run Make Command to Setup Webserver and Apply Latest Migrations as it comes up
+### Step 2 - Setup your database .env file - that we will use for authentication
+```
+MYSQL_USER=
+MYSQL_PASSWORD=
+MYSQL_DATABASE=
+MYSQL_ROOT_USER=
+MYSQL_ROOT_PASSWORD=
+
+# Correct the DATABASE_URL and TEST_DB_URL to use actual credentials
+DATABASE_URL=mysql://root:<root-pass>@localhost/student_db
+TEST_DB_URL=mysql://root:<root-pass>@localhost/test_student_db
+
+```
+
+
+### Step 3 - Run Make Command to Setup Webserver and Apply Latest Migrations as it comes up
 ```
 /one2n-sre-bootcamp/milestone-1-create-a-rest-api - make setup_venv - Setup your venv 
 /one2n-sre-bootcamp/milestone-1-create-a-rest-api - source venv/bin/activate  - Activate the venv
@@ -25,7 +42,7 @@ cd one2n-sre-bootcamp/milestone-1-create-a-rest-api`
 $make all   - Runs everything , that applies migrations, and also runs the Flask server
 ```
 
-### Step 3 - Run Unit Tests for API 
+### Step 4 - Run Unit Tests for API 
 `/one2n-sre-bootcamp/milestone-1-create-a-rest-api - make run_tests` - All tests will pass here
 
 
