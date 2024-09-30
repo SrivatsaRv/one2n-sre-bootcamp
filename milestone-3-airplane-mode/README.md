@@ -54,7 +54,7 @@ $make build_api  #brings up a semantic versioned Flask API image
 $make run_api   #brings up the Flask API container image, that will now be up and running , based on flag , migrations may or may not have been applied. 
 ```
 
-### Step 6 - Decide If Migrations Should Apply / Or Not when Container Comes Up
+### Step 7 - Decide If Migrations Should Apply / Or Not when Container Comes Up
 ```
 #NOTE - Docker compose file , has a variable called - MIGRATIONS: "false" / "true" - depending on what you set here, the Flask API container will execute its ENTRYPOINT command
 
