@@ -1,8 +1,7 @@
-## Milestone-2 - One Click Local Deployment Step
+## Milestone-3 - One Click Local Deployment Step
 
 **Goal** - To get the environment setup and running in the least amount of steps possible. 
 
-# Milestone 2 - Containerizing the REST API
 
 ### Prerequisites
 Make sure you have the following installed on your machine:
@@ -83,8 +82,6 @@ $make run_api   #brings up the Flask API container image, that will now be up an
 ```
 
 
-
-
 ## Milestone Expectations
 - API should be run using the docker image - ✅
 - API and its dependent services should be run using docker-compose - ✅
@@ -102,5 +99,3 @@ $make run_api   #brings up the Flask API container image, that will now be up an
     - It should first start the DB and run DB DML migrations - ✅ 
     - (Good to have) You can even include checks to see if the DB is already running and DB migrations are already applied. (applies conditinoally based on toggle variable) - ✅
     - Later it should invoke the docker compose command to start the API docker container.  (fulfilled by compose seutp, and entrypoint -> cmd) - ✅
-
-make venv_setup -> source venv/bin/activate - proceed 
