@@ -97,5 +97,5 @@ $make run_api   #brings up the Flask API container image, that will now be up an
 
 - When we run the make target to start the REST API docker container
     - It should first start the DB and run DB DML migrations - ✅ 
-    - (Good to have) You can even include checks to see if the DB is already running and DB migrations are already applied. (applies conditinoally based on toggle variable) - ✅
+    - (Good to have) You can even include checks to see if the DB is already running and DB migrations are already applied. (applies conditionally based on MIGRATION variable) - ✅
     - Later it should invoke the docker compose command to start the API docker container.  (fulfilled by compose seutp, and entrypoint -> cmd) - ✅
