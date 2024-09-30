@@ -10,15 +10,47 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Always use the container's DATABASE_URL
-DATABASE_URL = os.getenv('DATABASE_URL_CONTAINER')
+# Determine which database URL to use based on the environment
+FLASK_ENV = os.getenv('FLASK_ENV', 'production')
 
-# Ensure the DATABASE_URL is set
-if not DATABASE_URL:
-    raise ValueError("No DATABASE_URL_CONTAINER set for Flask application. Set the environment variable before running the app.")
+if FLASK_ENV == 'testing':
+    # Use the test database for local tests
+    DATABASE_URL = os.getenv('DATABASE_URL_TEST_CONTAINER')
+    if not DATABASE_URL:
+        raise ValueError("No DATABASE_URL_TEST_CONTAINER set for Flask application.")
+else:
+    # Use the production database inside Docker
+    DATABASE_URL = os.getenv('DATABASE_URL_CONTAINER')
+    if not DATABASE_URL:
+        raise ValueError("No DATABASE_URL_CONTAINER set for Flask application.")
 
+# Set SQLAlchemy configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+
+## OLD CODE 
+# import logging
+# from flask import Flask, request, jsonify
+# from models import db, Student
+# import os
+# from flask_migrate import Migrate
+# from dotenv import load_dotenv  # For loading environment variables from .env file
+
+# # Load environment variables from the .env file
+# load_dotenv()
+
+# app = Flask(__name__)
+
+# # Always use the container's DATABASE_URL
+# DATABASE_URL = os.getenv('DATABASE_URL_CONTAINER')
+
+# # Ensure the DATABASE_URL is set
+# if not DATABASE_URL:
+#     raise ValueError("No DATABASE_URL_CONTAINER set for Flask application. Set the environment variable before running the app.")
+
+# app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize DB and migration tool
 db.init_app(app)

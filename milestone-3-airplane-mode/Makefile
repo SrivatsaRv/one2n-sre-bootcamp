@@ -33,19 +33,19 @@ run_db:
 	@echo "Starting MySQL container using Docker Compose"
 	@docker-compose up -d mysql
 
-# Initialize Alembic migrations locally (First-time setup) - RUNS LOCALLY
+# Initialize Alembic migrations locally (First-time setup)
 init_migrations:
-	@echo "Initializing Alembic migrations locally"
+	@echo "Initializing Alembic migrations..."
 	@flask db init
 
-# Generate a new migration based on models.py changes locally - RUNS LOCALLY
+# Generate a new migration based on models.py changes
 generate_migration:
-	@echo "Generating latest migration based on model changes"
-	@flask db migrate -m "Generate migration"
+	@echo "Generating migration..."
+	@flask db migrate -m "Auto-generated migration"
 
 # Build Flask API image with version tag
 build_api:
-	@echo "Building Flask API image with version $(TAG)"
+	@echo "Building Flask API image with version $(TAG)..."
 	@docker build -t $(IMAGE_NAME):$(TAG) .
 
 # Start the Flask API container using Docker Compose and set the image version
@@ -53,12 +53,24 @@ run_api:
 	@echo "Starting Flask API container with version $(TAG)"
 	@API_VERSION=$(TAG) docker-compose up -d api
 
-# Clean up any existing containers and network  (REMOVE THE || TRUE )
+# Target to ensure the test database is created
+create_test_db:
+	@docker exec -it mysql_container mysql -uroot -p$(MYSQL_ROOT_PASSWORD) -e "CREATE DATABASE IF NOT EXISTS test_student_db;"
+
+# Run tests using pytest with the test_student_db
+run_tests:
+	@echo "Running tests using test_student_db..."
+	@PYTHONPATH=./ FLASK_ENV=testing DATABASE_URL=$(DATABASE_URL_TEST_CONTAINER) pytest tests/test_app.py
+
+# Full setup: DB Up -> Init Migrations -> Generate Migration -> Build Image -> Run Container -> Container Handles Migrations -> Run Tests
+all: check_env run_db init_migrations generate_migration build_api run_api run_tests
+
+# Clean up any existing containers and network
 clean:
 	@echo "Stopping and removing containers if they exist..."  
-	@docker stop flask-app $(SQL_CONTAINER_NAME)
-	@docker rm flask-app $(SQL_CONTAINER_NAME)
+	@docker stop flask_api $(SQL_CONTAINER_NAME)
+	@docker rm flask_api $(SQL_CONTAINER_NAME)
 	@docker network rm $(NETWORK_NAME)
 
-# Full setup: Build Flask API image, run DB, initialize migrations, run Flask, apply migrations
-all: build_api run_db init_migrations generate_migration run_api	
+# Full CI pipeline: Run DB -> Init Migrations -> Generate Migration -> Build API -> Run Tests
+ci_pipeline: check_env run_db init_migrations generate_migration build_api run_api run_tests
