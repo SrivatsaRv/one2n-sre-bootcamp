@@ -11,6 +11,23 @@ Make sure you have the following installed on your machine:
 - pip3: Python package manager
 - Requirements.txt file - (especially flask)
 
+### Step 0 - Prepare your .env file in the Project Directory
+```
+#NOTE - Have a .env file that has the following format - 
+
+MYSQL_PASSWORD=<password>
+MYSQL_DATABASE=student_db
+MYSQL_ROOT_PASSWORD=<password>
+
+# For the Docker container, use the MySQL service name
+#DATABASE_URL_CONTAINER=mysql://root:<password>@mysql_container:3306/student_db   #use this , and comment below line - before building flask-app docker image
+#DATABASE_URL_CONTAINER=mysql://root:<password>@127.0.0.1:3306/student_db         #use this , and comment above line - after generating alembic migration files (flask db migrate)
+
+# For local Alembic operations
+DATABASE_URL_LOCAL=mysql://root:<password>@127.0.0.1:3306/student_db
+
+```
+
 ### Step 1 - Clone the Repository and Activate Venv
 ```
 git clone https://github.com/SrivatsaRv/one2n-sre-bootcamp.git \
