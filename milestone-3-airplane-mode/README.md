@@ -19,9 +19,9 @@ MYSQL_PASSWORD=<password>
 MYSQL_DATABASE=student_db
 MYSQL_ROOT_PASSWORD=<password>
 
-# For the Docker container, use the MySQL service name
-#DATABASE_URL_CONTAINER=mysql://root:<password>@mysql_container:3306/student_db   #use this , and comment below line - before building flask-app docker image
-#DATABASE_URL_CONTAINER=mysql://root:<password>@127.0.0.1:3306/student_db         #use this , and comment above line - after generating alembic migration files (flask db migrate)
+#NOTE - $DATABASE_URL_CONTAINER - needs a change in how name of SQL database is being referenced.
+#DATABASE_URL_CONTAINER=mysql://root:<password>@mysql_container:3306/student_db
+#DATABASE_URL_CONTAINER=mysql://root:<password>@127.0.0.1:3306/student_db 
 
 # For local Alembic operations
 DATABASE_URL_LOCAL=mysql://root:<password>@127.0.0.1:3306/student_db
@@ -40,42 +40,52 @@ $source venv/bin/activate
 ### Step 2 - Bring up Database Container (MySQL 8.0)
 
 ```
-$make run_db  
-
-#NOTE - brings up a MySQL 8.0 container with student_db database created, no tables here yet. 
+$make run_db   
 ```
 
 ### Step 3 - Initialize Alembic Directory and Generate a Migration File
 ```
 #NOTE - Run init_migrations only if you do not see a migrations/ folder in your working directory 
 
-$make init_migrations   #initiates alembic , this brings up migrations/ folder
+$make init_migrations
 
 #NOTE - .env file - should have the string  @127.0.0.1:3306/student_db (so alembic can generate the migration file locally after diff with sql container)
 
-$make generate_migration   # generates the schema migration file under migrations/versions/<generated-migration-file>.py
+$make generate_migration 
 ```
 
 ### Step 4 - Version and Build the API Server Image 
 ```
-#NOTE - .env file - should have the string  @mysql_container:3306/student_db (this env file is shared with container as well , which can now reference db by name (mysql_container)
+#NOTE - .env file - $DB_URL_CONTAINER should have the string  @mysql_container:3306/student_db
 #NOTE - Makefile - change the tag if you'd want it to be versioned, else keep it TAG ?=1.0.0
 
-$make build_api  #brings up a semantic versioned Flask API image
+$make build_api
 ```
 
-### Step 6 - Decide If Migrations Should Apply / Or Not when Container Comes Up
+### Step 6 - Run the Flask-API Container from Generated Image
 ```
-#NOTE - Docker compose file , has a variable called - MIGRATIONS: "false" / "true" - depending on what you set here, the Flask API container will execute its ENTRYPOINT command
+#NOTE - Docker Compose - setting- MIGRATIONS: "false" / "true" - App container will decide migrations apply
 
-$make run_api   #brings up the Flask API container image, that will now be up and running , based on flag , migrations may or may not have been applied. 
+$make run_api
 ```
 
-### Step 7 - Decide If Migrations Should Apply / Or Not when Container Comes Up
+### Step 7 - Run Unit Tests 
 ```
-#NOTE - Docker compose file , has a variable called - MIGRATIONS: "false" / "true" - depending on what you set here, the Flask API container will execute its ENTRYPOINT command
+$make run_tests
 
-$make run_api   #brings up the Flask API container image, that will now be up and running , based on flag , migrations may or may not have been applied. 
+(venv) admin@SrivatsaRV milestone-3-airplane-mode % make run_tests
+Running tests using test_student_db...
+
+==================test session starts===========================
+platform darwin -- Python 3.12.6, pytest-8.3.3, pluggy-1.5.0
+rootdir: /Users/admin/one2n-sre-bootcamp/milestone-3-airplane-mode
+configfile: pytest.ini
+collected 8 items                                                                                                             
+
+tests/test_app.py ........                                                                                              [100%]
+
+=================== 8 passed in 0.34s ==================
+
 ``` 
 
 
