@@ -5,14 +5,15 @@ from flask import json
 import os
 from sqlalchemy import text
 
-# Fixtures for setting up a separate test database
 @pytest.fixture
 def client():
-    # Use test database from the environment variable
-    test_db_url = os.getenv('DATABASE_URL_TEST_CONTAINER')
+    test_db_url = os.getenv('DB_URL')
 
     if not test_db_url:
-        raise ValueError("DATABASE_URL_TEST_CONTAINER not set in the environment variables")
+        raise ValueError("DB_URL not set in the environment variables")
+
+    # Replace the database name in the URL
+    test_db_url = test_db_url.replace('/student_db', '/test_student_db')
 
     app.config['SQLALCHEMY_DATABASE_URI'] = test_db_url
     app.config['TESTING'] = True
@@ -23,13 +24,11 @@ def client():
             with db.engine.connect() as connection:
                 connection.execute(text("USE test_student_db"))
             
-            # Drop and recreate all tables to reset the database for each test
             db.drop_all()
             db.create_all()
 
         yield client
 
-        # Drop all tables after the tests (optional, if you want to reset it afterward)
         with app.app_context():
             db.drop_all()
 

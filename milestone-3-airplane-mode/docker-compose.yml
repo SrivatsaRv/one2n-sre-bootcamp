@@ -7,25 +7,24 @@ services:
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./mysql-init:/docker-entrypoint-initdb.d/  # Init script for both databases
+      - ./mysql-init:/docker-entrypoint-initdb.d/
     networks:
       - app_network
 
   api:
     build:
-      context: .  # Use the current directory to build the API
+      context: .
       dockerfile: Dockerfile
     image: flask-api:${API_VERSION}
     container_name: flask_api
     environment:
       FLASK_APP: app.py
-      DATABASE_URL_CONTAINER: ${DATABASE_URL_CONTAINER}  # DB URL inside the container
-      MIGRATIONS: "true"  # Run migrations when the container starts
+      DB_URL: ${DB_URL}  # Use the new DB_URL environment variable
+      MIGRATIONS: "true"
     ports:
       - "5000:5000"
     depends_on:
@@ -35,7 +34,7 @@ services:
 
 volumes:
   mysql_data:
-    name: mysql_data  # Persistent MySQL data
+    name: mysql_data
 
 networks:
   app_network:
