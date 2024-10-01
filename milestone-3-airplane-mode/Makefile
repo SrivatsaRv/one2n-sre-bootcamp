@@ -34,7 +34,7 @@ venv_setup:
 # Start the MySQL container using Docker Compose
 run_db:
 	@echo "Starting MySQL container using Docker Compose"
-	@docker-compose up -d mysql
+	@docker-compose up -d mysql && sleep 10
 
 # Initialize Alembic migrations locally (First-time setup)
 init_migrations:
@@ -62,7 +62,8 @@ run_tests:
 	@PYTHONPATH=./ FLASK_ENV=testing DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@$(DB_HOST):3306/test_student_db pytest tests/test_app.py
 
 # Full setup: DB Up -> Init Migrations -> Generate Migration -> Build Image -> Run Container -> Container Handles Migrations -> Run Tests
-all: check_env run_db init_migrations generate_migration build_api run_api run_tests
+all: run_db init_migrations generate_migration build_api run_api run_tests
+#all: run_db init_migrations generate_migration build_api run_api run_tests
 
 
 # Clean up any existing containers and network
