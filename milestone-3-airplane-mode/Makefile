@@ -62,7 +62,7 @@ run_tests:
 	@PYTHONPATH=./ FLASK_ENV=testing DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@$(DB_HOST):3306/test_student_db pytest tests/test_app.py
 
 # Full setup: DB Up -> Init Migrations -> Generate Migration -> Build Image -> Run Container -> Container Handles Migrations -> Run Tests
-all: run_db init_migrations generate_migration build_api run_api run_tests
+all: run_db build_api run_api run_tests
 #all: run_db init_migrations generate_migration build_api run_api run_tests
 
 
