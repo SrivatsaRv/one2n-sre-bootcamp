@@ -15,17 +15,9 @@ Make sure you have the following installed on your machine:
 ```
 #NOTE - Have a .env file that has the following format - 
 
-MYSQL_PASSWORD=<password>
-MYSQL_DATABASE=student_db
 MYSQL_ROOT_PASSWORD=<password>
-
-#NOTE - $DATABASE_URL_CONTAINER - needs a change in how name of SQL database is being referenced.
-#DATABASE_URL_CONTAINER=mysql://root:<password>@mysql_container:3306/student_db
-#DATABASE_URL_CONTAINER=mysql://root:<password>@127.0.0.1:3306/student_db 
-
-# For local Alembic operations
-DATABASE_URL_LOCAL=mysql://root:<password>@127.0.0.1:3306/student_db
-
+MYSQL_DATABASE=student_db
+DB_URL=mysql://root:<password>@{DB_HOST}:3306/student_db
 ```
 
 ### Step 1 - Clone the Repository and Activate Venv
@@ -37,57 +29,19 @@ $make venv_setup
 $source venv/bin/activate
 ```
 
-### Step 2 - Bring up Database Container (MySQL 8.0)
-
+### Step 2 - Run the Makefile Targets 
 ```
-$make run_db   
-```
-
-### Step 3 - Initialize Alembic Directory and Generate a Migration File
-```
-#NOTE - Run init_migrations only if you do not see a migrations/ folder in your working directory 
-
-$make init_migrations
-
-#NOTE - .env file - should have the string  @127.0.0.1:3306/student_db (so alembic can generate the migration file locally after diff with sql container)
-
-$make generate_migration 
+$make all
 ```
 
-### Step 4 - Version and Build the API Server Image 
+### Actions in the Makefile will run the following steps - 
 ```
-#NOTE - .env file - $DB_URL_CONTAINER should have the string  @mysql_container:3306/student_db
-#NOTE - Makefile - change the tag if you'd want it to be versioned, else keep it TAG ?=1.0.0
-
-$make build_api
+- Run DB Container 
+- Run DB DML Migrations 
+- Build New Docker Image 
+- Run New Container 
+- Run Tests 
 ```
-
-### Step 6 - Run the Flask-API Container from Generated Image
-```
-#NOTE - Docker Compose - setting- MIGRATIONS: "false" / "true" - App container will decide migrations apply
-
-$make run_api
-```
-
-### Step 7 - Run Unit Tests 
-```
-$make run_tests
-
-(venv) admin@SrivatsaRV milestone-3-airplane-mode % make run_tests
-Running tests using test_student_db...
-
-==================test session starts===========================
-platform darwin -- Python 3.12.6, pytest-8.3.3, pluggy-1.5.0
-rootdir: /Users/admin/one2n-sre-bootcamp/milestone-3-airplane-mode
-configfile: pytest.ini
-collected 8 items                                                                                                             
-
-tests/test_app.py ........                                                                                              [100%]
-
-=================== 8 passed in 0.34s ==================
-
-``` 
-
 
 ### Verification of Schema Being Applied  - 
 **Attach shell to mysql container running - and follow below steps**
@@ -122,7 +76,7 @@ tests/test_app.py ........                                                      
 - To add pre-requisites for any existing tools that must already be installed (e.g., docker, make, etc) - ✅
 - To run different make targets and the order of execution - ✅
 
-- When we run the make target to start the REST API docker container
+### When we run the make target to start the REST API docker container
     - It should first start the DB and run DB DML migrations - ✅ 
-    - (Good to have) You can even include checks to see if the DB is already running and DB migrations are already applied. (applies conditionally based on MIGRATION variable) - ✅
+    - (Good to have) You can even include checks to see if the DB is already running and DB migrations are already applied. - ✅
     - Later it should invoke the docker compose command to start the API docker container.  (fulfilled by compose seutp, and entrypoint -> cmd) - ✅
