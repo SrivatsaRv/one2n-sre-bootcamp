@@ -5,6 +5,7 @@ from flask import json
 import os
 from sqlalchemy import text
 
+
 @pytest.fixture
 def client():
     test_db_url = os.getenv('DB_URL')
@@ -23,7 +24,7 @@ def client():
             # Ensure the test database is selected and reset
             with db.engine.connect() as connection:
                 connection.execute(text("USE test_student_db"))
-            
+
             db.drop_all()
             db.create_all()
 
