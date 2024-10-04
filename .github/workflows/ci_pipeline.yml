@@ -27,13 +27,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Skip Docker installation as it's already available on GitHub runners
-
-      - name: Install Docker Compose (if needed)
-        run: |
-          sudo curl -L "https://github.com/docker/compose/releases/download/2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:

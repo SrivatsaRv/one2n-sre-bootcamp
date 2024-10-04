@@ -34,7 +34,7 @@ venv_setup:
 # Start the MySQL container using Docker Compose
 run_db:
 	@echo "Starting MySQL container using Docker Compose"
-	@docker-compose up -d mysql && sleep 10
+	@docker compose up -d mysql && sleep 10
 
 # Initialize Alembic migrations locally (First-time setup)
 init_migrations:
@@ -84,10 +84,7 @@ deploy_pipeline: ci_pipeline docker_login docker_push
 clean:
 	@echo "Cleaning up all app-related Docker containers, networks, images, and volumes..."
 	# Stop and remove containers associated with flask_api and the MySQL container
-	@docker-compose down --rmi all --volumes --remove-orphans
-
-	# Remove dangling images, volumes, and networks (if any remain)
-	@docker system prune -f --volumes
+	@docker compose down --rmi all --volumes --remove-orphans
 
 # Full CI pipeline: DB Up -> Migrations -> Generate Migration -> Build API -> Run Tests -> Lint -> Everything Works -> Login and Push to Docker 
 ci_pipeline: check_env run_db init_migrations generate_migration lint run_tests build_flask_image docker_login docker_push
@@ -97,4 +94,4 @@ ci_pipeline: check_env run_db init_migrations generate_migration lint run_tests 
 
 run_flask_container:
 	@echo "Starting Flask API container with version $(TAG)"
-	@API_VERSION=$(TAG) DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql_container:3306/${MYSQL_DATABASE} docker-compose up -d api
+	@API_VERSION=$(TAG) DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql_container:3306/${MYSQL_DATABASE} docker compose up -d api
