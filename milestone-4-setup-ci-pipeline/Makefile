@@ -34,7 +34,7 @@ venv_setup:
 # Start the MySQL container using Docker Compose
 run_db:
 	@echo "Starting MySQL container using Docker Compose"
-	@docker compose up -d mysql && sleep 5
+	@docker compose up -d mysql && sleep 10
 
 # Initialize Alembic migrations locally (First-time setup)
 init_migrations:
