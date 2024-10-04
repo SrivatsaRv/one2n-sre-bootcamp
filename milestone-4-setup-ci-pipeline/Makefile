@@ -4,7 +4,7 @@ ifneq (,$(wildcard ./.env))
     export
 endif
 
-# Variables for Docker operations
+# Variables for Docker operations...
 IMAGE_NAME = ${DOCKERHUB_USERNAME}/one2n-bootcamp
 SQL_CONTAINER_NAME = mysql_container
 SQL_IMAGE = mysql:8.0
