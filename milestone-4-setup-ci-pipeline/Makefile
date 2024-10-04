@@ -77,10 +77,12 @@ deploy_pipeline: ci_pipeline docker_login docker_push
 
 # Clean up any existing containers and network
 clean:
-	@echo "Stopping and removing containers if they exist..."  
-	@docker stop flask_api $(SQL_CONTAINER_NAME)
-	@docker rm flask_api $(SQL_CONTAINER_NAME)
-	@docker network rm $(NETWORK_NAME)
+	@echo "Cleaning up all app-related Docker containers, networks, images, and volumes..."
+	# Stop and remove containers associated with flask_api and the MySQL container
+	@docker-compose down --rmi all --volumes --remove-orphans
+
+	# Remove dangling images, volumes, and networks (if any remain)
+	@docker system prune -f --volumes
 
 # Full CI pipeline: DB Up -> Migrations -> Generate Migration -> Build API -> Run Tests -> Lint -> Everything Works -> Login and Push to Docker 
 ci_pipeline: check_env run_db init_migrations generate_migration lint run_tests build_flask_image docker_login docker_push
@@ -91,5 +93,3 @@ ci_pipeline: check_env run_db init_migrations generate_migration lint run_tests 
 run_flask_container:
 	@echo "Starting Flask API container with version $(TAG)"
 	@API_VERSION=$(TAG) DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql_container:3306/${MYSQL_DATABASE} docker-compose up -d api
-
-
