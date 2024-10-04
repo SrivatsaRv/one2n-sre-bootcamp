@@ -13,7 +13,6 @@ on:
     paths:
       - 'milestone-4-setup-ci-pipeline/**'
 
-
 jobs:
   ci-pipeline:
     runs-on: self-hosted
@@ -25,30 +24,38 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
       DB_HOST: mysql
       CI: true
+      GITHUB_WORKSPACE: ${{ github.workspace }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install dependencies
+      - name: Set up Python and Install dependencies
         run: |
-          python3 -m venv venv
-          source /Users/admin/actions-runner/_work/one2n-sre-bootcamp/one2n-sre-bootcamp/milestone-4-setup-ci-pipeline/venv/bin/activate
+          python3 -m venv $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv
+          echo "Activating virtual environment in $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv"
+          source $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv/bin/activate
           python3 -m pip install --upgrade pip
-          pip3 install -r requirements.txt
-        working-directory: ./milestone-4-setup-ci-pipeline
+          pip3 install -r $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/requirements.txt
+        env:
+          GITHUB_WORKSPACE: ${{ github.workspace }}
 
       - name: Start MySQL and run services using Docker Compose (run_db)
         run: |
+          source $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv/bin/activate
           make run_db
         working-directory: ./milestone-4-setup-ci-pipeline
 
       - name: Run linting
-        run: make lint
+        run: |
+          source $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv/bin/activate
+          make lint
         working-directory: ./milestone-4-setup-ci-pipeline
 
       - name: Run tests
-        run: make run_tests
+        run: |
+          source $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv/bin/activate
+          pytest tests/test_app.py
         working-directory: ./milestone-4-setup-ci-pipeline
 
       - name: Login to Docker Hub
@@ -61,6 +68,7 @@ jobs:
         env:
           DOCKER_REPO: ${{ secrets.DOCKERHUB_USERNAME }}/one2n-bootcamp
         run: |
+          source $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv/bin/activate
           make build_flask_image
           make docker_push
         working-directory: ./milestone-4-setup-ci-pipeline
