@@ -65,7 +65,8 @@ run_tests:
 lint:
 	flake8 app.py tests/test_app.py models.py
 # Full setup: DB Up -> Init Migrations -> Generate Migration -> Build Image -> Run Container -> Container Handles Migrations -> Run Tests
-all: run_db build_api run_api run_tests
+
+all: run_db build_api run_api run_tests lint
 #all: run_db init_migrations generate_migration build_api run_api run_tests
 
 

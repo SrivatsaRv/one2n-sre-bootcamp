@@ -48,11 +48,13 @@ migrate = Migrate(app, db)
 
 logger.info('Application has started.')
 
+
 # Custom error handler for 404 - Not Found
 @app.errorhandler(404)
 def resource_not_found(e):
     logger.warning(f"Resource not found: {request.url}")
     return jsonify({'error': 'Resource not found'}), 404
+
 
 # Custom error handler for 400 - Bad Request
 @app.errorhandler(400)
@@ -60,11 +62,13 @@ def bad_request(e):
     logger.error(f"Bad request: {request.url} - {request.data}")
     return jsonify({'error': 'Bad request', 'message': str(e)}), 400
 
+
 # Generic error handler for 500 - Internal Server Error
 @app.errorhandler(500)
 def internal_server_error(e):
     logger.error(f"Server error: {str(e)}", exc_info=True)
     return jsonify({'error': 'Internal Server Error', 'message': 'An unexpected error occurred'}), 500
+
 
 # Routes
 @app.route('/api/v1/students', methods=['GET'])
@@ -73,26 +77,29 @@ def get_students():
     logger.info('Fetched all students.')
     return jsonify([{'id': s.id, 'name': s.name, 'age': s.age, 'grade': s.grade} for s in students])
 
+
 @app.route('/api/v1/students/<int:id>', methods=['GET'])
 def get_student(id):
     student = Student.query.get_or_404(id)
     logger.info(f"Fetched student with ID {id}.")
     return jsonify({'id': student.id, 'name': student.name, 'age': student.age, 'grade': student.grade})
 
+
 @app.route('/api/v1/students', methods=['POST'])
 def add_student():
     data = request.get_json()
-    
+
     # Handle missing fields in the request
     if not all(k in data for k in ('name', 'age', 'grade')):
         logger.warning(f"Bad request - Missing fields in POST data: {data}")
         return bad_request('Missing required fields: name, age, or grade')
-    
+
     new_student = Student(name=data['name'], age=data['age'], grade=data['grade'])
     db.session.add(new_student)
     db.session.commit()
     logger.info(f"Added new student: {data['name']}.")
     return jsonify({'message': 'Student added successfully!'}), 201
+
 
 @app.route('/api/v1/students/<int:id>', methods=['PUT'])
 def update_student(id):
@@ -110,6 +117,7 @@ def update_student(id):
     logger.info(f"Updated student with ID {id}.")
     return jsonify({'message': 'Student updated successfully!'})
 
+
 @app.route('/api/v1/students/<int:id>', methods=['DELETE'])
 def delete_student(id):
     student = Student.query.get_or_404(id)
@@ -118,10 +126,12 @@ def delete_student(id):
     logger.info(f"Deleted student with ID {id}.")
     return jsonify({'message': 'Student deleted successfully!'})
 
+
 @app.route('/api/v1/healthcheck', methods=['GET'])
 def healthcheck():
     logger.info('Health check endpoint called.')
     return jsonify({'status': 'API is healthy!'})
+
 
 if __name__ == '__main__':
     logger.info('Starting the Flask application...')
