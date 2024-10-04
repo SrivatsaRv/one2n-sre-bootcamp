@@ -49,7 +49,7 @@ init_migrations:
 # Generate a new migration based on models.py changes (ensure it's executed)
 generate_migration:
 	@echo "Generating migration (if necessary)..."
-	@DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@$(DB_HOST):3306/${MYSQL_DATABASE} flask db migrate -m "Auto-generated migration"
+	@DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@127.0.0.1:3306/${MYSQL_DATABASE} flask db migrate -m "Auto-generated migration"
 	
 # Lint the code using flake8
 lint:
@@ -59,7 +59,7 @@ lint:
 # Run tests using pytest
 run_tests:
 	@echo "Running tests using test_student_db..."
-	@PYTHONPATH=./ FLASK_ENV=testing DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@$(DB_HOST):3306/test_student_db pytest tests/test_app.py
+	@PYTHONPATH=./ FLASK_ENV=testing DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@127.0.0.1:3306/test_student_db pytest tests/test_app.py
 
 # Build Flask API Docker image with version tag
 build_flask_image:
