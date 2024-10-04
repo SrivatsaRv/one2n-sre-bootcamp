@@ -5,7 +5,7 @@ ifneq (,$(wildcard ./.env))
 endif
 
 # Variables for Docker operations
-IMAGE_NAME = flask-api
+IMAGE_NAME = ${DOCKERHUB_USERNAME}/one2n-bootcamp
 SQL_CONTAINER_NAME = mysql_container
 SQL_IMAGE = mysql:8.0
 DB_VOLUME = mysql_data
@@ -46,29 +46,34 @@ generate_migration:
 	@echo "Generating migration..."
 	@DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@$(DB_HOST):3306/${MYSQL_DATABASE} flask db migrate -m "Auto-generated migration"
 
-# Build Flask API image with version tag
-build_api:
-	@echo "Building Flask API image with version $(TAG)..."
-	@docker build -t $(IMAGE_NAME):$(TAG) .
+# Lint the code using flake8
+lint:
+	@echo "Running code linting with flake8..."
+	flake8 app.py tests/test_app.py models.py
 
-# Start the Flask API container using Docker Compose and set the image version
-run_api:
-	@echo "Starting Flask API container with version $(TAG)"
-	@API_VERSION=$(TAG) DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql_container:3306/${MYSQL_DATABASE} docker-compose up -d api
-
-# Run tests using pytest with the test_student_db
+# Run tests using pytest
 run_tests:
 	@echo "Running tests using test_student_db..."
 	@PYTHONPATH=./ FLASK_ENV=testing DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@$(DB_HOST):3306/test_student_db pytest tests/test_app.py
 
+# Build Flask API Docker image with version tag
+build_flask_image:
+	@echo "Building Flask API Docker image with version $(TAG)..."
+	@docker build -t $(IMAGE_NAME):$(TAG) .
 
-lint:
-	flake8 app.py tests/test_app.py models.py
-# Full setup: DB Up -> Init Migrations -> Generate Migration -> Build Image -> Run Container -> Container Handles Migrations -> Run Tests
 
-all: run_db build_api run_api run_tests lint
-#all: run_db init_migrations generate_migration build_api run_api run_tests
+# Login to DockerHub using Personal Access Token (non-interactive)
+docker_login:
+	@echo "Logging in to DockerHub..."
+	@echo "${DOCKERHUB_TOKEN}" | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
 
+# Push Docker image to DockerHub
+docker_push:
+	@echo "Pushing Docker image to DockerHub..."
+	@docker push $(IMAGE_NAME):$(TAG)
+
+# Full pipeline including Docker login and push
+deploy_pipeline: ci_pipeline docker_login docker_push
 
 # Clean up any existing containers and network
 clean:
@@ -77,6 +82,14 @@ clean:
 	@docker rm flask_api $(SQL_CONTAINER_NAME)
 	@docker network rm $(NETWORK_NAME)
 
+# Full CI pipeline: DB Up -> Migrations -> Generate Migration -> Build API -> Run Tests -> Lint -> Everything Works -> Login and Push to Docker 
+ci_pipeline: check_env run_db init_migrations generate_migration lint run_tests build_flask_image docker_login docker_push
 
-# Full CI pipeline: Run DB -> Init Migrations -> Generate Migration -> Build API -> Run Tests
-ci_pipeline: check_env run_db init_migrations generate_migration build_api run_api run_tests
+## OPTIONAL - FOR MILESTONE-4
+# Start the Flask API container using Docker Compose and set the image version
+
+run_flask_container:
+	@echo "Starting Flask API container with version $(TAG)"
+	@API_VERSION=$(TAG) DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql_container:3306/${MYSQL_DATABASE} docker-compose up -d api
+
+
