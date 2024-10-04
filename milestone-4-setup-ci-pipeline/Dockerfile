@@ -1,5 +1,5 @@
 # Stage 1: Build stage
-FROM python:3.9-slim AS build-stage
+FROM python:3.9 AS build-stage
 
 # Install system dependencies for mysqlclient and other needed libraries
 RUN apt-get update && apt-get install -y --no-install-recommends \
