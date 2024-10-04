@@ -6,6 +6,7 @@ on:
       - milestone-4/setup-ci-pipeline
     paths:
       - 'milestone-4-setup-ci-pipeline/**'
+      - '.github/'
   pull_request:
     branches:
       - main
@@ -27,14 +28,14 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Install dependencies
         run: |
           whoami
           hostname
           python3 -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip3 install -r requirements.txt
         working-directory: ./milestone-4-setup-ci-pipeline
 
       - name: Start MySQL and run services using Docker Compose (run_db)
@@ -63,6 +64,3 @@ jobs:
           make build_flask_image
           make docker_push
         working-directory: ./milestone-4-setup-ci-pipeline
-
-      - name: Run docker 
-        run: docker logs mysql_container
