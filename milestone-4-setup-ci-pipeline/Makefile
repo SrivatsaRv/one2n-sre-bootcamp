@@ -45,7 +45,6 @@ init_migrations:
 		flask db init; \
 	fi
 
-
 # Generate a new migration based on models.py changes (ensure it's executed)
 generate_migration:
 	@echo "Generating migration (if necessary)..."
@@ -84,7 +83,7 @@ deploy_pipeline: ci_pipeline docker_login docker_push
 clean:
 	@echo "Cleaning up all app-related Docker containers, networks, images, and volumes..."
 	# Stop and remove containers associated with flask_api and the MySQL container
-	@docker compose down --rmi all --volumes --remove-orphans
+	@docker compose down --rmi all --volumes
 
 # Full CI pipeline: DB Up -> Migrations -> Generate Migration -> Build API -> Run Tests -> Lint -> Everything Works -> Login and Push to Docker 
 ci_pipeline: check_env run_db init_migrations generate_migration lint run_tests build_flask_image docker_login docker_push
