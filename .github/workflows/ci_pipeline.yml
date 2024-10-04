@@ -64,6 +64,3 @@ jobs:
           make build_flask_image
           make docker_push
         working-directory: ./milestone-4-setup-ci-pipeline
-
-      - name: Run docker 
-        run: docker logs mysql_container
