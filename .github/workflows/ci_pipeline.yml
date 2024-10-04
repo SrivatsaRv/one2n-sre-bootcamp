@@ -36,6 +36,8 @@ jobs:
 
       - name: Install dependencies
         run: |
+          whoami
+          hostname
           python -m pip install --upgrade pip
           pip install -r requirements.txt
         working-directory: ./milestone-4-setup-ci-pipeline
