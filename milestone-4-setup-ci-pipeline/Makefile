@@ -38,7 +38,7 @@ run_db:
 
 # Initialize Alembic migrations locally (First-time setup)
 init_migrations:
-	@echo "Initializing Alembic migrations..."
+	@echo "Initializing Alembic migrations"
 	@flask db init
 
 # Generate a new migration based on models.py changes
