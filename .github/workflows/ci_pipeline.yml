@@ -4,16 +4,18 @@ on:
   push:
     branches:
       - milestone-4/setup-ci-pipeline
+    paths:
+      - 'milestone-4-setup-ci-pipeline/**'
   pull_request:
     branches:
       - main
     paths:
       - 'milestone-4-setup-ci-pipeline/**'
-  workflow_dispatch:
+
 
 jobs:
   ci-pipeline:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     env:
       MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
