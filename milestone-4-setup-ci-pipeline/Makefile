@@ -53,7 +53,7 @@ generate_migration:
 # Lint the code using flake8
 lint:
 	@echo "Running code linting with flake8..."
-	flake8 app.py tests/test_app.py models.py
+	/Users/admin/one2n-sre-bootcamp/milestone-4-setup-ci-pipeline/venv/bin/flake8 app.py tests/test_app.py models.py
 
 # Run tests using pytest
 run_tests:

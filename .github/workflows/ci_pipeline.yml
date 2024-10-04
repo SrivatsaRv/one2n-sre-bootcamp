@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m venv venv
-          source venv/bin/activate
+          source /Users/admin/actions-runner/_work/one2n-sre-bootcamp/one2n-sre-bootcamp/milestone-4-setup-ci-pipeline/venv/bin/activate
           python3 -m pip install --upgrade pip
           pip3 install -r requirements.txt
         working-directory: ./milestone-4-setup-ci-pipeline
