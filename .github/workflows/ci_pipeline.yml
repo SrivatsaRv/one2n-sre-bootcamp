@@ -6,7 +6,7 @@ on:
       - milestone-4/setup-ci-pipeline
     paths:
       - 'milestone-4-setup-ci-pipeline/**'
-      - '.github/'
+      - '../.github/'
   pull_request:
     branches:
       - main
