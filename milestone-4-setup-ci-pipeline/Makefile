@@ -16,7 +16,7 @@ VENV_DIR = venv  # Virtual environment directory
 # Define a default DB_HOST that can be overridden
 DB_HOST ?= 127.0.0.1
 
-# Ensure the .env file contains necessary variables
+# Ensure the .env file contains necessary variables..
 check_env:
 	@if [ ! -f ".env" ]; then \
 		echo "Error: .env file not found."; \
