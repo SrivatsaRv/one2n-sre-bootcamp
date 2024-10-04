@@ -58,7 +58,7 @@ lint:
 # Run tests using pytest
 run_tests:
 	@echo "Running tests using test_student_db..."
-	@PYTHONPATH=./ FLASK_ENV=testing DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@127.0.0.1:3306/test_student_db pytest tests/test_app.py
+	@PYTHONPATH=./ FLASK_ENV=testing DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@127.0.0.1:3306/test_student_db python3 -m pytest tests/test_app.py
 
 # Build Flask API Docker image with version tag
 build_flask_image:
