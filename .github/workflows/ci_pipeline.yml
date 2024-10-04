@@ -12,11 +12,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-test-lint:
+  ci-pipeline:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./milestone-4-setup-ci-pipeline
+        working-directory: ./milestone-4-setup-ci-pipeline  # Correct working directory
 
     services:
       mysql:
@@ -37,8 +37,9 @@ jobs:
       MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      DB_HOST: mysql  # **Correctly set to 'mysql'**
-      CI: true        # Indicates running in CI environment
+      DB_HOST: mysql          # Correctly set to service name
+      CI: true                # Indicates running in CI environment
+      TAG: ${{ github.sha }}  # Use GitHub SHA as Docker image tag
 
     steps:
       - name: Checkout repository
@@ -49,22 +50,10 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install system dependencies
+      - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y make
-
-      - name: Install Docker Compose
-        run: |
-          sudo curl -L "https://github.com/docker/compose/releases/download/2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-
-      - name: Set up .env file
-        run: |
-          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
-          echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
-          echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> .env
-          echo "DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}" >> .env
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Wait for MySQL to be ready
         run: |
@@ -81,9 +70,28 @@ jobs:
         run: |
           mysql -h mysql -u root -p${MYSQL_ROOT_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS test_student_db;"
 
+      - name: Run linting
+        run: make lint
+
       - name: Run CI Pipeline
+        run: make ci_pipeline
+
+      - name: Run tests
+        run: make run_tests
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        env:
+          DOCKER_REPO: ${{ secrets.DOCKERHUB_USERNAME }}/one2n-bootcamp
+          TAG: ${{ github.sha }}
         run: |
-          make ci_pipeline
+          docker build -t $DOCKER_REPO:$TAG .
+          docker push $DOCKER_REPO:$TAG
 
       - name: Clean up resources
         if: always()
