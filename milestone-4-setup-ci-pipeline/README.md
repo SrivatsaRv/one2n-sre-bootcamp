@@ -1,6 +1,6 @@
-## Milestone-3 - One Click Local Deployment Step
+## Milestone-4 - Setup a CI Pipeline
 
-**Goal** - To get the environment setup and running in the least amount of steps possible. 
+**Problem Statement** - We want to create a simple CI pipeline that will be used to build and push our docker image to a central registry. You can use DockerHub or GitHub docker registry as a central docker registry.
 
 
 ### Prerequisites
@@ -10,6 +10,7 @@ Make sure you have the following installed on your machine:
 - Make: Install Make Tool 
 - pip3: Python package manager
 - Requirements.txt file - (especially flask)
+- Github Self Hosted Runner 
 
 ### Step 0 - Prepare your .env file in the Project Directory
 ```
