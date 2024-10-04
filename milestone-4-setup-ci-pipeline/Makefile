@@ -38,14 +38,19 @@ run_db:
 
 # Initialize Alembic migrations locally (First-time setup)
 init_migrations:
-	@echo "Initializing Alembic migrations"
-	@flask db init
+	@if [ -d "migrations" ]; then \
+		echo "Migrations folder exists, skipping init."; \
+	else \
+		echo "Initializing Alembic migrations"; \
+		flask db init; \
+	fi
 
-# Generate a new migration based on models.py changes
+
+# Generate a new migration based on models.py changes (ensure it's executed)
 generate_migration:
-	@echo "Generating migration..."
+	@echo "Generating migration (if necessary)..."
 	@DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@$(DB_HOST):3306/${MYSQL_DATABASE} flask db migrate -m "Auto-generated migration"
-
+	
 # Lint the code using flake8
 lint:
 	@echo "Running code linting with flake8..."
