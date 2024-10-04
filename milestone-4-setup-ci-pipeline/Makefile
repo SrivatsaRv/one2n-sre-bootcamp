@@ -9,7 +9,7 @@ IMAGE_NAME = ${DOCKERHUB_USERNAME}/one2n-bootcamp
 SQL_CONTAINER_NAME = mysql_container
 SQL_IMAGE = mysql:8.0
 DB_VOLUME = mysql_data
-TAG ?= 1.3.0  # Default semantic version for the image, changeable via command line
+TAG ?= 1.4.0  # Default semantic version for the image, changeable via command line
 NETWORK_NAME = flask_network
 VENV_DIR = venv  # Virtual environment directory
 
