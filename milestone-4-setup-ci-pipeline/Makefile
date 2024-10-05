@@ -85,6 +85,7 @@ ci_pipeline: check_env run_db lint run_tests build_flask_image docker_login dock
 
 ## OPTIONAL - FOR MILESTONE-4
 # Start the Flask API container using Docker Compose and set the image version
+##@security unlock-keychain -p "YOUR_KEYCHAIN_PASSWORD" ~/Library/Keychains/login.keychain-db
 
 run_flask_container:
 	@echo "Starting Flask API container with version $(TAG)"
