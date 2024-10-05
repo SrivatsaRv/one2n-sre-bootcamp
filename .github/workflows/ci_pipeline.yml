@@ -22,16 +22,27 @@ jobs:
       MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      DB_HOST: mysql
+      CI: true
       GITHUB_WORKSPACE: ${{ github.workspace }}
       DB_URL: ${{ secrets.DB_URL }}
 
     steps:
+      - name: Unlock Keychain (for Docker)
+        run: |
+          security -v unlock-keychain ~/Library/Keychains/login.keychain-db
+
+      - name: Ensure Docker config access
+        run: |
+          mkdir -p ~/.docker
+          touch ~/.docker/config.json
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
       - name: Create .env file
         run: |
-          echo "DB_URL=mysql://root:${{ secrets.MYSQL_ROOT_PASSWORD }}@mysql_container:3306/${{ secrets.MYSQL_DATABASE }}" > $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/.env
+          echo "DB_URL=${{ secrets.DB_URL }}" > $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/.env
           echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/.env
           echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/.env
         env:
@@ -41,15 +52,15 @@ jobs:
         run: |
           python3 -m venv $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv
           source $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv/bin/activate
-          pip install --upgrade pip
-          pip install -r $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/requirements.txt
+          python3 -m pip install --upgrade pip
+          pip3 install -r $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/requirements.txt
         env:
           GITHUB_WORKSPACE: ${{ github.workspace }}
 
-      - name: Start MySQL and run services using Docker Compose
+      - name: Start MySQL and run services using Docker Compose (run_db)
         run: |
           source $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv/bin/activate
-          docker compose up -d mysql && docker exec -it mysql_container bash -c "until mysqladmin ping -h localhost --silent; do sleep 1; done"
+          make run_db
         working-directory: ./milestone-4-setup-ci-pipeline
 
       - name: Run linting
@@ -72,6 +83,8 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push Docker image
+        env:
+          DOCKER_REPO: ${{ secrets.DOCKERHUB_USERNAME }}/one2n-bootcamp
         run: |
           source $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv/bin/activate
           make build_flask_image
