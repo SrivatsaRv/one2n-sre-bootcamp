@@ -55,6 +55,7 @@ jobs:
       - name: Run tests
         run: |
           source $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv/bin/activate
+          export PYTHONPATH=$GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline
           pytest tests/test_app.py
         working-directory: ./milestone-4-setup-ci-pipeline
 
