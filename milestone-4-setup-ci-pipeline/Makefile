@@ -24,7 +24,7 @@ check_env:
 	fi
 	@echo "Using environment variables from .env file"
 
-# Virtual environment setup for local development....
+# Virtual environment setup for local development.....
 venv_setup:
 	@echo "Setting up virtual environment..."
 	python3 -m venv venv
