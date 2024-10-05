@@ -66,7 +66,7 @@ build_flask_image:
 	@docker build -t $(IMAGE_NAME):$(TAG) .
 
 
-# Login to DockerHub using Personal Access Token (non-interactive)
+# Login to DockerHub using Personal Access Token (non-interactive)..
 docker_login:
 	@echo "Logging in to DockerHub..."
 	@echo "${DOCKERHUB_TOKEN}" | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
