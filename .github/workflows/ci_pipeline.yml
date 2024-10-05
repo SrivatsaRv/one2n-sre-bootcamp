@@ -25,6 +25,7 @@ jobs:
       DB_HOST: mysql
       CI: true
       GITHUB_WORKSPACE: ${{ github.workspace }}
+      DB_URL: ${{ secrets.DB_URL }}  # Using the DB_URL from secrets
 
     steps:
       - name: Checkout repository
