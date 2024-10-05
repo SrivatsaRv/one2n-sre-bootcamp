@@ -28,15 +28,6 @@ jobs:
       DB_URL: ${{ secrets.DB_URL }}
 
     steps:
-      - name: Unlock Keychain (for Docker)
-        run: |
-          security -v unlock-keychain ~/Library/Keychains/login.keychain-db
-
-      - name: Ensure Docker config access
-        run: |
-          mkdir -p ~/.docker
-          touch ~/.docker/config.json
-
       - name: Checkout repository
         uses: actions/checkout@v2
 
