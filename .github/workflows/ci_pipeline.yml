@@ -12,6 +12,12 @@ on:
       - main
     paths:
       - 'milestone-4-setup-ci-pipeline/**'
+  workflow_dispatch: # Allows manual triggering of the pipeline
+    inputs:
+      tag: # Optional: Let the user input a tag version for the Docker image
+        description: 'Enter the Docker tag version to use (optional)'
+        required: false
+        default: 'latest'
 
 jobs:
   ci-pipeline:
