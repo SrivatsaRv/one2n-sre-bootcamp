@@ -1,6 +1,9 @@
-name: CI Pipeline
+name: Milestone-4-Setup-CI-Pipeline
 
-on:
+on: 
+
+  workflow_dispatch: # Allows manual triggering of the pipeline'
+
   push:
     branches:
       - milestone-4/setup-ci-pipeline
@@ -12,12 +15,7 @@ on:
       - main
     paths:
       - 'milestone-4-setup-ci-pipeline/**'
-  workflow_dispatch: # Allows manual triggering of the pipeline
-    inputs:
-      tag: # Optional: Let the user input a tag version for the Docker image
-        description: 'Enter the Docker tag version to use (optional)'
-        required: false
-        default: 'latest'
+  
 
 jobs:
   ci-pipeline:
@@ -80,8 +78,6 @@ jobs:
         working-directory: ./milestone-4-setup-ci-pipeline
 
       - name: Build and push Docker image
-        env:
-          DOCKER_REPO: ${{ secrets.DOCKERHUB_USERNAME }}/one2n-bootcamp
         run: |
           source $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv/bin/activate
           make build_flask_image
