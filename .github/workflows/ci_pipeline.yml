@@ -36,6 +36,7 @@ jobs:
           echo "DB_URL=${{ secrets.DB_URL }}" > $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/.env
           echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/.env
           echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/.env
+          echo "KEYCHAIN_PASSWORD=${{ secrets.KEYCHAIN_PASSWORD }}" >> $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/.env
         env:
           GITHUB_WORKSPACE: ${{ github.workspace }}
 
