@@ -9,7 +9,7 @@ IMAGE_NAME = ${DOCKERHUB_USERNAME}/one2n-bootcamp
 SQL_CONTAINER_NAME = mysql_container
 SQL_IMAGE = mysql:8.0
 DB_VOLUME = mysql_data
-TAG ?= 1.4.0  # Default semantic version for the image, changeable via command line
+TAG ?= 1.5.0  # Default semantic version for the image, changeable via command line
 NETWORK_NAME = flask_network
 VENV_DIR = venv  # Virtual environment directory
 
@@ -38,17 +38,12 @@ run_db:
 
 # Initialize Alembic migrations locally (First-time setup)
 init_migrations:
-	@if [ -d "migrations" ]; then \
-		echo "Migrations folder exists, skipping init."; \
-	else \
-		echo "Initializing Alembic migrations"; \
-		flask db init; \
-	fi
+	@flask db init
 
 # Generate a new migration based on models.py changes (ensure it's executed)
 generate_migration:
 	@echo "Generating migration (if necessary)..."
-	@DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@127.0.0.1:3306/${MYSQL_DATABASE} flask db migrate -m "Auto-generated migration"
+	@DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@127.0.0.1:3306/${MYSQL_DATABASE} flask db migrate -m "dropped grade column"
 	
 # Lint the code using flake8
 lint:
@@ -83,10 +78,10 @@ deploy_pipeline: ci_pipeline docker_login docker_push
 clean:
 	@echo "Cleaning up all app-related Docker containers, networks, images, and volumes..."
 	# Stop and remove containers associated with flask_api and the MySQL container
-	@docker compose down --rmi all --volumes
+	@docker compose down
 
 # Full CI pipeline: DB Up -> Migrations -> Generate Migration -> Build API -> Run Tests -> Lint -> Everything Works -> Login and Push to Docker 
-ci_pipeline: check_env run_db init_migrations generate_migration lint run_tests build_flask_image docker_login docker_push
+ci_pipeline: check_env run_db lint run_tests build_flask_image docker_login docker_push
 
 ## OPTIONAL - FOR MILESTONE-4
 # Start the Flask API container using Docker Compose and set the image version
