@@ -11,7 +11,7 @@ SQL_IMAGE = mysql:8.0
 DB_VOLUME = mysql_data
 TAG ?= 1.6.0  # Default semantic version for the image, changeable via command line
 NETWORK_NAME = flask_network
-VENV_DIR = venv  # Virtual environment directory
+VENV_DIR = venv  # Virtual environment directory..
 
 # Define a default DB_HOST that can be overridden
 DB_HOST ?= 127.0.0.1
