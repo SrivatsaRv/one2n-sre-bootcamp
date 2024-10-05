@@ -64,7 +64,7 @@ build_flask_image:
 # Login to DockerHub using Personal Access Token (non-interactive)..
 docker_login:
 	@echo "Logging in to DockerHub..."
-	@security unlock-keychain -p "YOUR_KEYCHAIN_PASSWORD" ~/Library/Keychains/login.keychain-db
+	@security unlock-keychain -p "$(KEYCHAIN_PASSWORD)" ~/Library/Keychains/login.keychain-db
 	@echo "${DOCKERHUB_TOKEN}" | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
 
 # Push Docker image to DockerHub
