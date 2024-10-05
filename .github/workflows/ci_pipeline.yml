@@ -25,11 +25,19 @@ jobs:
       DB_HOST: mysql
       CI: true
       GITHUB_WORKSPACE: ${{ github.workspace }}
-      DB_URL: ${{ secrets.DB_URL }}  # Using the DB_URL from secrets
+      DB_URL: ${{ secrets.DB_URL }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Create .env file
+        run: |
+          echo "DB_URL=${{ secrets.DB_URL }}" > $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/.env
+          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/.env
+          echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/.env
+        env:
+          GITHUB_WORKSPACE: ${{ github.workspace }}
 
       - name: Set up Python and Install dependencies
         run: |
