@@ -70,6 +70,7 @@ jobs:
       - name: Login to Docker Hub
         run: | 
           make docker_login
+        working-directory: ./milestone-4-setup-ci-pipeline
 
       - name: Build and push Docker image
         env:
