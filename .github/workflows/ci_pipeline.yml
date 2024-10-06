@@ -1,0 +1,84 @@
+name: Milestone-4-Setup-CI-Pipeline
+
+on:
+  workflow_dispatch:  # Allows manual triggering of the pipeline
+
+  push:
+    branches:
+      - milestone-4/setup-ci-pipeline
+    paths:
+      - 'milestone-4-setup-ci-pipeline/**'
+      - '.github/**'
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'milestone-4-setup-ci-pipeline/**'
+
+jobs:
+  ci-pipeline:
+    runs-on: self-hosted
+
+    env:
+      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      DB_HOST: mysql
+      CI: true
+      GITHUB_WORKSPACE: ${{ github.workspace }}
+      DB_URL: ${{ secrets.DB_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Create .env file
+        run: |
+          echo "DB_URL=${{ secrets.DB_URL }}" > $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/.env
+          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/.env
+          echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/.env
+          echo "KEYCHAIN_PASSWORD=${{ secrets.KEYCHAIN_PASSWORD }}" >> $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/.env
+        env:
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+
+      - name: Set up Python and Install dependencies
+        run: |
+          python3 -m venv $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv
+          source $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv/bin/activate
+          python3 -m pip install --upgrade pip
+          pip3 install -r $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/requirements.txt
+        env:
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+
+      - name: Start MySQL and run services using Docker Compose (run_db)
+        run: |
+          source $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv/bin/activate
+          make run_db
+        working-directory: ./milestone-4-setup-ci-pipeline
+
+      - name: Run linting
+        run: |
+          source $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv/bin/activate
+          make lint
+        working-directory: ./milestone-4-setup-ci-pipeline
+
+      - name: Run tests
+        run: |
+          source $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv/bin/activate
+          export PYTHONPATH=$GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline
+          make run_tests
+        working-directory: ./milestone-4-setup-ci-pipeline
+
+      - name: Login to Docker Hub
+        run: |
+          make docker_login
+        working-directory: ./milestone-4-setup-ci-pipeline
+
+      - name: Build and push Docker image
+        run: |
+          source $GITHUB_WORKSPACE/milestone-4-setup-ci-pipeline/venv/bin/activate
+          make build_flask_image
+          make docker_push
+        working-directory: ./milestone-4-setup-ci-pipeline
