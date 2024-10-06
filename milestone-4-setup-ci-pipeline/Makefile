@@ -61,11 +61,15 @@ build_flask_image:
 	@docker build -t $(IMAGE_NAME):$(TAG) .
 
 
-# Login to DockerHub using Personal Access Token (non-interactive)..
+# Login to DockerHub using Personal Access Token (non-interactive)
 docker_login:
 	@echo "Logging in to DockerHub..."
-	@security unlock-keychain -p "$(KEYCHAIN_PASSWORD)" ~/Library/Keychains/login.keychain-db
+	@if [ "$(shell uname)" = "Darwin" ]; then \
+		echo "Running on macOS, unlocking keychain..."; \
+		security unlock-keychain -p "$(KEYCHAIN_PASSWORD)" ~/Library/Keychains/login.keychain-db; \
+	fi
 	@echo "${DOCKERHUB_TOKEN}" | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
+
 
 # Push Docker image to DockerHub
 docker_push:
@@ -77,16 +81,13 @@ deploy_pipeline: ci_pipeline docker_login docker_push
 
 # Clean up any existing containers and network
 clean:
-	@echo "Cleaning up all app-related Docker containers, networks, images, and volumes..."
+	@echo "Cleaning up all app-related Docker containers"
 	# Stop and remove containers associated with flask_api and the MySQL container
 	@docker compose down
 
 # Full CI pipeline: DB Up -> Migrations -> Generate Migration -> Build API -> Run Tests -> Lint -> Everything Works -> Login and Push to Docker 
 ci_pipeline: check_env run_db lint run_tests build_flask_image docker_login docker_push
 
-## OPTIONAL - FOR MILESTONE-4
-# Start the Flask API container using Docker Compose and set the image version
-##@security unlock-keychain -p "YOUR_KEYCHAIN_PASSWORD" ~/Library/Keychains/login.keychain-db
 
 run_flask_container:
 	@echo "Starting Flask API container with version $(TAG)"
