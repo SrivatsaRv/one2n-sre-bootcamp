@@ -1,83 +1,32 @@
-## Milestone-4 - Setup a CI Pipeline
+# Milestone-4: Setup CI Pipeline with GitHub Actions
 
-**Problem Statement** - We want to create a simple CI pipeline that will be used to build and push our docker image to a central registry. You can use DockerHub or GitHub docker registry as a central docker registry.
+This project sets up a CI pipeline using GitHub Actions. The pipeline performs tasks such as environment setup, running lint checks, executing tests, and building and pushing Docker images to DockerHub. Additionally, the workflow can be manually triggered through GitHub's UI.
 
+## Table of Contents
 
-### Prerequisites
-Make sure you have the following installed on your machine:
-- Docker version 27.1.1 or equivalent 
-- Python 3.12 or higher
-- Make: Install Make Tool 
-- pip3: Python package manager
-- Requirements.txt file - (especially flask)
-- Github Self Hosted Runner 
+- [Prerequisites](#prerequisites)
+- [Step 1: Clone the Repository](#step-1-clone-the-repository)
+- [Step 2: Configure GitHub Secrets](#step-2-configure-github-secrets)
+- [Step 3: Create the Workflow](#step-3-create-the-workflow)
+- [Step 4: Set Up Environment](#step-4-set-up-environment)
+- [Step 5: Run the Workflow Manually](#step-5-run-the-workflow-manually)
+- [Step 6: Monitor the Pipeline](#step-6-monitor-the-pipeline)
+- [Common Issues](#common-issues)
+- [Conclusion](#conclusion)
 
-### Step 0 - Prepare your .env file in the Project Directory
-```
-#NOTE - Have a .env file that has the following format - 
+## Prerequisites
 
-MYSQL_ROOT_PASSWORD=<password>
-MYSQL_DATABASE=student_db
-DB_URL=mysql://root:<password>@{DB_HOST}:3306/student_db
-```
+Before getting started, ensure you have the following prerequisites:
 
-### Step 1 - Clone the Repository and Activate Venv
-```
-git clone https://github.com/SrivatsaRv/one2n-sre-bootcamp.git \
-cd one2n-sre-bootcamp/milestone-3-airplane-mode
+- Git installed on your machine
+- Docker installed and running
+- A GitHub account with **write access** to the repository
+- A GitHub Actions self-hosted runner or access to GitHub-hosted runners
+- Python installed on your local machine
 
-$make venv_setup
-$source venv/bin/activate
-```
+### Required Tools
 
-### Step 2 - Run the Makefile Targets 
-```
-$make all
-```
-
-### Actions in the Makefile will run the following steps - 
-```
-- Run DB Container 
-- Run DB DML Migrations 
-- Build New Docker Image 
-- Run New Container 
-- Run Tests 
-```
-
-### Verification of Schema Being Applied  - 
-**Attach shell to mysql container running - and follow below steps**
-```
-- Inside the database container
-- USE student_db;   - student_db is created by docker compose setup 
-    - SHOW tables;  - 2 table should be created (alembic_versions and student) 
-        - SELECT * FROM student;   - list all entries in the student table 
-        - DESCRIBE student; - displays the schema , note it down
-```
-
-**Inserting Records - Killing Existing App Container - Spawning a New One**
-```
-    - Insert Records from Postman - (5 Records) - 
-    - Kill Flask Container -> set MIGRATIONS = FALSE in docker-compose file -> rename image version from 1.0.0 to 1.1.0 , 
-    - Build New Image -> Start New Container - Flask should be served again 
-    - Insert Records from Postman - (5 New Records)
-    - Validation - SAME DATABASE VOLUME SHOULD CONTINUE TAKING WRITES) 
-```
-
-
-## Milestone Expectations
-- API should be run using the docker image - ✅
-- API and its dependent services should be run using docker-compose - ✅
-
-- Makefile should have the following targets.
-    - To start DB container - ✅
-    - To run DB DML migrations - ✅
-    - To build REST API docker image - ✅
-    - To run REST API docker container - ✅
-- README.md file should be updated with instructions
-- To add pre-requisites for any existing tools that must already be installed (e.g., docker, make, etc) - ✅
-- To run different make targets and the order of execution - ✅
-
-### When we run the make target to start the REST API docker container
-    - It should first start the DB and run DB DML migrations - ✅ 
-    - (Good to have) You can even include checks to see if the DB is already running and DB migrations are already applied. - ✅
-    - Later it should invoke the docker compose command to start the API docker container.  (fulfilled by compose seutp, and entrypoint -> cmd) - ✅
+- **Git**: [Install Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+- **Docker**: [Install Docker](https://docs.docker.com/get-docker/)
+- **Python**: [Install Python](https://www.python.org/downloads/)
+- **GitHub Account**: Sign up at [GitHub](https://github.com)
