@@ -100,4 +100,5 @@ jobs:
         with:
           push: true
           tags: srivatsarv21/one2n-bootcamp:1.8.0
-        working-directory: ./milestone-4-setup-ci-pipeline
+          file: ./milestone-4-setup-ci-pipeline/Dockerfile
+        
