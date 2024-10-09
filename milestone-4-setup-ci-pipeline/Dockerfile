@@ -39,8 +39,8 @@ COPY app.py models.py run.sh ./
 # Copy the migrations folder (ensure it exists locally)
 COPY migrations/ /app/migrations/
 
-# Ensure run.sh is executable
-RUN chmod +x /app/run.sh
+# # Ensure run.sh is executable
+# RUN chmod +x /app/run.sh
 
 # Set the Flask app environment variable
 ENV FLASK_APP=app.py
