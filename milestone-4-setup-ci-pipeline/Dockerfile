@@ -20,7 +20,7 @@ COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Stage 2: Final stage (runtime environment)
-FROM python:3.9-slim
+FROM gcr.io/distroless/python3
 
 # Install the runtime dependency for mysqlclient
 RUN apt-get update && apt-get install -y --no-install-recommends \
