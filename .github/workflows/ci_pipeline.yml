@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - milestone-4/setup-ci-pipeline
+      - distroless
     paths:
       - 'milestone-4-setup-ci-pipeline/**'
       - '.github/**'
@@ -19,6 +20,7 @@ on:
 jobs:
   ci-pipeline:
     runs-on: self-hosted
+    if: github.ref_name == 'main'
 
     env:
       MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
@@ -82,3 +84,21 @@ jobs:
           make build_flask_image
           make docker_push
         working-directory: ./milestone-4-setup-ci-pipeline
+
+  distroless-testing:
+    runs-on: ubuntu-latest
+    if: github.ref_name == 'distroless'
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: srivatsarv21/one2n-bootcamp:1.8.0
+          file: ./milestone-4-setup-ci-pipeline/Dockerfile
+        
