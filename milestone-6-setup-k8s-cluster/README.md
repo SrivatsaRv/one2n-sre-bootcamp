@@ -37,3 +37,12 @@ prod-cluster-m03   Ready    <none>          23h   v1.31.0   dependency-app
 prod-cluster-m04   Ready    <none>          23h   v1.31.0   monitoring-stack
 
 ```
+
+
+### Handy Commands - to handle minikube context-switches
+```
+$ minikube status -p app-cluster      
+$ kubectl config use-context app-cluster
+
+if you don't do this , minikube will assume minikube cluster context
+```
