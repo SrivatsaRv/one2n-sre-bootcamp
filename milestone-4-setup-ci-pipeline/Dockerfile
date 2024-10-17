@@ -21,11 +21,10 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Stage 2: Final stage (runtime environment)
 FROM python:3.9-slim
-#FROM gcr.io/distroless/python3
 
 # Install the runtime dependency for mysqlclient
-#RUN apt-get -y default-libmysqlclient-dev \
-#   && rm -rf /var/lib/apt/lists/*
+RUN apt-get -y default-libmysqlclient-dev \
+   && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
 WORKDIR /app
