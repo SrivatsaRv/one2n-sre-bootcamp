@@ -9,7 +9,7 @@ IMAGE_NAME = ${DOCKERHUB_USERNAME}/one2n-bootcamp
 SQL_CONTAINER_NAME = mysql_container
 SQL_IMAGE = mysql:8.0
 DB_VOLUME = mysql_data
-TAG ?= 1.6.0  # Default semantic version for the image, changeable via command line
+TAG ?= 6.1.0  # Default semantic version for the image, changeable via command line
 NETWORK_NAME = flask_network
 VENV_DIR = venv  # Virtual environment directory..
 
@@ -43,7 +43,7 @@ init_migrations:
 # Generate a new migration based on models.py changes (ensure it's executed)
 generate_migration:
 	@echo "Generating migration (if necessary)..."
-	@DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@127.0.0.1:3306/${MYSQL_DATABASE} flask db migrate -m "dropped grade column"
+	@DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@127.0.0.1:3306/${MYSQL_DATABASE} flask db migrate -m "Creating table"
 	
 # Lint the code using flake8
 lint:
