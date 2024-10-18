@@ -23,9 +23,13 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 FROM python:3.9-slim
 
 # Install the runtime dependencies for mysqlclient
+# Install system dependencies for mysqlclient and other needed libraries
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libmariadb3 \
-    libmariadb-dev-compat \
+    gcc \
+    default-libmysqlclient-dev \
+    build-essential \
+    libffi-dev \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
