@@ -19,3 +19,5 @@ env
 
 # System-Specific Files
 .DS_Store
+portforward.log
+.dockerconfigjson
