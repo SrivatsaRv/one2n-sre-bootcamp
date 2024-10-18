@@ -43,7 +43,7 @@ init_migrations:
 # Generate a new migration based on models.py changes (ensure it's executed)
 generate_migration:
 	@echo "Generating migration (if necessary)..."
-	@DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@127.0.0.1:3306/${MYSQL_DATABASE} flask db migrate -m "dropped grade column"
+	@DB_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@127.0.0.1:3306/${MYSQL_DATABASE} flask db migrate -m "Creating table"
 	
 # Lint the code using flake8
 lint:
