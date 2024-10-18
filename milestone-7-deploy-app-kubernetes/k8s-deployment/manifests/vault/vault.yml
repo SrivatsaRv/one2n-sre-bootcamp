@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vault
+  namespace: vault
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vault
+  template:
+    metadata:
+      labels:
+        app: vault
+    spec:
+      nodeSelector:
+        type: dependent-services   # Ensure it runs only on the node labeled 'dependent-services'
+      tolerations:
+      - key: "dependent-services"  # Toleration for the taint on prod-cluster-m04
+        operator: "Exists"
+        effect: "NoSchedule"
+      containers:
+        - name: vault
+          image: hashicorp/vault:1.10.0  # Specific stable version
+          ports:
+            - containerPort: 8200
+          volumeMounts:
+            - name: config
+              mountPath: /vault/config
+            - name: data
+              mountPath: /vault/data
+          env:
+            - name: VAULT_ADDR
+              value: "http://127.0.0.1:8200"  # Vault internal address
+            - name: VAULT_SKIP_VERIFY
+              value: "true"                   # Skip TLS verification for internal comms
+            - name: VAULT_CACERT
+              value: ""                       # No CA Cert (not using TLS)
+            - name: VAULT_API_ADDR
+              value: "http://127.0.0.1:8200"  # API Address
+            - name: VAULT_CLUSTER_ADDR
+              value: "http://127.0.0.1:8201"  # Cluster communication address
+          command:
+            - "vault"
+            - "server"
+            - "-config=/vault/config/vault-config.hcl"
+      volumes:
+        - name: config
+          configMap:
+            name: vault-config
+        - name: data
+          persistentVolumeClaim:
+            claimName: vault-pvc
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vault-config
+  namespace: vault
+data:
+  vault-config.hcl: |
+    storage "raft" {
+      path = "/vault/data"
+    }
+
+    listener "tcp" {
+      address         = "0.0.0.0:8200"
+      tls_disable     = "true"           # Disable TLS for simplicity (can be secured later)
+    }
+
+    ui = true  # Enable the Vault UI for easy management
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vault-pvc
+  namespace: vault
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi  # Persistent storage size for Vault data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vault
+  namespace: vault
+spec:
+  selector:
+    app: vault
+  ports:
+    - protocol: TCP
+      port: 8200
+      targetPort: 8200
+  type: ClusterIP  # Can be changed to NodePort or LoadBalancer based on your setup
