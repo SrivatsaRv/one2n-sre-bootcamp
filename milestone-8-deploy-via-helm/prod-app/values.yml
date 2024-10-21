@@ -1,0 +1,58 @@
+# Vault configuration
+global:
+  enabled: true
+
+server:
+  image:
+    repository: hashicorp/vault
+    tag: "1.10.0"
+
+  # High Availability settings using single-node Raft
+  ha:
+    enabled: false
+    replicas: 1  # Explicitly enforce a single replica for HA
+
+  raft:
+    enabled: true  # Enable Raft storage
+    setNodeCount: 1  # Configures Raft for a single-node setup
+    config: |
+      storage "raft" {
+        path = "/vault/data"
+      }
+      listener "tcp" {
+        address = "0.0.0.0:8200"
+        tls_disable = "true"
+      }
+      ui = true  # Enable the Vault UI
+
+  # Node selector and tolerations (run only on the dependent-services node)
+  nodeSelector:
+    type: dependent-services
+
+  tolerations:
+    - key: "dependent-services"
+      operator: "Exists"
+      effect: "NoSchedule"
+
+  # Persistent storage for Raft
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: ""  # Use default storage class for Persistent Volume Claim (PVC)
+
+  # Vault environment variables
+  env:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_SKIP_VERIFY: "true"
+    VAULT_API_ADDR: "http://127.0.0.1:8200"
+    VAULT_CLUSTER_ADDR: "http://127.0.0.1:8201"
+
+  # Replicas: 1 node for single-node Raft
+  replicaCount: 1  # Ensure only one node for single-node Raft
+
+  # Service configuration (ClusterIP)
+  service:
+    type: ClusterIP
+    ports:
+      - port: 8200
+        targetPort: 8200
