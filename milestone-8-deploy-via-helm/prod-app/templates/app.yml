@@ -1,0 +1,74 @@
+---
+# Flask App Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app.name }}  # Templated app name
+  namespace: {{ .Values.namespace }}  # Templated namespace
+spec:
+  replicas: {{ .Values.app.replicaCount }}  # Number of replicas templated from values.yml
+  selector:
+    matchLabels:
+      app: {{ .Values.app.name }}  # Templated app name
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.name }}  # Templated app name
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.app.imagePullSecret }}  # DockerHub secret templated
+      containers:
+        - name: {{ .Values.app.name }}  # Templated app name
+          image: {{ .Values.app.image }}  # Templated Flask app image
+          ports:
+            - containerPort: {{ .Values.app.containerPort }}  # Templated container port
+          env:
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.secretName }}  # Templated secret reference
+                  key: DB_URL
+          resources:
+            requests:
+              memory: {{ .Values.app.resources.requests.memory }}  # Templated resource requests
+              cpu: {{ .Values.app.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.app.resources.limits.memory }}  # Templated resource limits
+              cpu: {{ .Values.app.resources.limits.cpu }}
+      initContainers:
+        - name: db-upgrade
+          image: {{ .Values.app.image }}  # Templated Flask app image for init container
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Starting DB Migration"
+              python3 -m flask db upgrade
+              echo "DB Migration completed"
+          env:
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.secretName }}  # Templated secret reference
+                  key: DB_URL
+          resources:
+            requests:
+              memory: {{ .Values.app.initContainer.resources.requests.memory }}  # Templated resource requests for init container
+              cpu: {{ .Values.app.initContainer.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.app.initContainer.resources.limits.memory }}  # Templated resource limits for init container
+              cpu: {{ .Values.app.initContainer.resources.limits.cpu }}
+---
+# Flask App Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.app.name }}-service  # Templated service name
+  namespace: {{ .Values.namespace }}  # Templated namespace
+spec:
+  type: {{ .Values.app.serviceType }}  # Templated service type (ClusterIP or NodePort)
+  selector:
+    app: {{ .Values.app.name }}  # Templated app name
+  ports:
+    - protocol: TCP
+      port: {{ .Values.app.servicePort }}  # Templated exposed service port
+      targetPort: {{ .Values.app.containerPort }}  # Templated Flask app container port

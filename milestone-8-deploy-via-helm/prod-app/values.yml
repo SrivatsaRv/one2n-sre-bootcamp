@@ -1,58 +1,82 @@
-# Vault configuration
-global:
-  enabled: true
+# Namespace for both Vault SecretStore and ExternalSecret
+namespace: student-api  
 
-server:
-  image:
-    repository: hashicorp/vault
-    tag: "1.10.0"
+# --- Vault SecretStore Configuration ---
+vault:
+  server: "http://vault.vault.svc.cluster.local:8200"
+  path: "secret"
+  version: "v1"
+  tokenSecretName: "vault-token"
+  tokenSecretKey: "token"
 
-  # High Availability settings using single-node Raft
-  ha:
-    enabled: false
-    replicas: 1  # Explicitly enforce a single replica for HA
+# --- ExternalSecret Configuration ---
+externalSecret:
+  name: db-credentials            # Name of the ExternalSecret resource
+  targetName: mysql-secret         # Name of the Kubernetes Secret to be created
+  refreshInterval: "1h"            # How often secrets are synced from Vault
+  # --- Vault Secrets Information ---
+  mysqlRootPassword:
+    key: "secret/mysql-root-password"    # Vault path for MySQL root password
+    property: "password"                 # Vault property (field) to fetch
+  mysqlDatabase:
+    key: "secret/mysql-database"         # Vault path for MySQL database name
+    property: "name"                     # Vault property (field) to fetch
+  mysqlUrl:
+    key: "secret/mysql-url"              # Vault path for MySQL URL
+    property: "url"                      # Vault property (field) to fetch
+  dockerhubConfig:
+    key: "secret/dockerhub-config"       # Vault path for DockerHub config
+    property: ".dockerconfigjson"         # Vault property (field) for DockerHub credentials
 
-  raft:
-    enabled: true  # Enable Raft storage
-    setNodeCount: 1  # Configures Raft for a single-node setup
-    config: |
-      storage "raft" {
-        path = "/vault/data"
-      }
-      listener "tcp" {
-        address = "0.0.0.0:8200"
-        tls_disable = "true"
-      }
-      ui = true  # Enable the Vault UI
+# --- MySQL Configuration ---
+mysql:
+  image: "mysql:8.0"                     # MySQL image version
+  replicaCount: 1                        # Number of MySQL replicas
+  secretName: mysql-secret               # Name of the Kubernetes Secret holding MySQL credentials
 
-  # Node selector and tolerations (run only on the dependent-services node)
-  nodeSelector:
-    type: dependent-services
+  pvcName: mysql-pvc                     # Name of the PersistentVolumeClaim for MySQL
+  configMapName: mysql-initdb-config      # Name of the ConfigMap for initializing MySQL database
 
-  tolerations:
-    - key: "dependent-services"
-      operator: "Exists"
-      effect: "NoSchedule"
-
-  # Persistent storage for Raft
   persistence:
-    enabled: true
-    size: 1Gi
-    storageClass: ""  # Use default storage class for Persistent Volume Claim (PVC)
+    size: 1Gi                            # Persistent volume size for MySQL
 
-  # Vault environment variables
-  env:
-    VAULT_ADDR: "http://127.0.0.1:8200"
-    VAULT_SKIP_VERIFY: "true"
-    VAULT_API_ADDR: "http://127.0.0.1:8200"
-    VAULT_CLUSTER_ADDR: "http://127.0.0.1:8201"
+  initdbConfig:
+    initSql: |
+      CREATE DATABASE IF NOT EXISTS student_db;   # SQL script to create the database
 
-  # Replicas: 1 node for single-node Raft
-  replicaCount: 1  # Ensure only one node for single-node Raft
+  resources:
+    requests:
+      memory: "512Mi"                     # Memory request for MySQL container
+      cpu: "500m"                         # CPU request for MySQL container
+    limits:
+      memory: "1Gi"                       # Memory limit for MySQL container
+      cpu: "1"                            # CPU limit for MySQL container
 
-  # Service configuration (ClusterIP)
-  service:
-    type: ClusterIP
-    ports:
-      - port: 8200
-        targetPort: 8200
+# --- Flask App Configuration ---
+app:
+  name: flask-app  # App name
+  replicaCount: 1  # Number of replicas for the Flask app
+  image: "srivatsarv21/one2n-bootcamp:6.1.0"  # Docker image for Flask app
+  imagePullSecret: "mysql-secret"  # DockerHub credentials secret
+  containerPort: 5000  # Flask app listening port
+  secretName: "mysql-secret"  # Name of the secret to pull DB_URL from
+
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1"
+
+  initContainer:
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "250m"
+      limits:
+        memory: "256Mi"
+        cpu: "500m"
+
+  serviceType: ClusterIP  # Type of service (ClusterIP or NodePort)
+  servicePort: 5000  # Port exposed by the service
