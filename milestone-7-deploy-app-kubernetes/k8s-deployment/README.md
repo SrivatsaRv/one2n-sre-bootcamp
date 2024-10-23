@@ -13,25 +13,6 @@ $minikube start --nodes 4 -p prod-cluster
 $cat ~/.kube/config 
 $minikube status -p prod-cluster
 $kubectl config use-context prod-cluster
-
-
-GET NODES and LIST THEM
-$kubectl get nodes
-NAME               STATUS   ROLES           AGE     VERSION
-prod-cluster       Ready    control-plane   3m29s   v1.31.0
-prod-cluster-m02   Ready    <none>          3m17s   v1.31.0
-prod-cluster-m03   Ready    <none>          3m9s    v1.31.0
-prod-cluster-m04   Ready    <none>          3m      v1.31.0
-
-
-
-$kubectl get nodes -L type
-NAME               STATUS   ROLES           AGE    VERSION   TYPE
-prod-cluster       Ready    control-plane   106m   v1.31.0   
-prod-cluster-m02   Ready    <none>          106m   v1.31.0   application
-prod-cluster-m03   Ready    <none>          106m   v1.31.0   database
-prod-cluster-m04   Ready    <none>          106m   v1.31.0   dependent-services
-
 ```
 
 ## Step 1: Create the Namespace and Apply the Taints on Nodes
