@@ -74,12 +74,6 @@ spec:
           configMap:
             name: {{ .Values.mysql.configMapName }}      # Templated ConfigMap name
 
-      # Tolerations to allow scheduling on the database node
-      tolerations:
-      - key: "database"
-        operator: "Equal"
-        value: "true"
-        effect: "NoSchedule"
 
       # Node affinity to enforce MySQL runs only on the database node
       affinity:

@@ -58,12 +58,6 @@ spec:
               memory: {{ .Values.app.initContainer.resources.limits.memory }}  # Templated resource limits for init container
               cpu: {{ .Values.app.initContainer.resources.limits.cpu }}
 
-      # Tolerations for scheduling on the application node
-      tolerations:
-      - key: "application"
-        operator: "Equal"
-        value: "true"
-        effect: "NoSchedule"
 
       # Node affinity to ensure pod runs on the application node
       affinity:
