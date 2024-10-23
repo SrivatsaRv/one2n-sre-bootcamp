@@ -1,0 +1,101 @@
+---
+# PersistentVolumeClaim for MySQL
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.mysql.pvcName }}            # Templated PVC name
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.mysql.persistence.size }}
+---
+# ConfigMap to Initialize the MySQL Database
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.mysql.configMapName }}       # Templated ConfigMap name
+  namespace: {{ .Values.namespace }}
+data:
+  init.sql: |
+    {{ .Values.mysql.initdbConfig.initSql | indent 4 }}
+---
+# MySQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.mysql.replicaCount }}
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: {{ .Values.mysql.image }}
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mysql.secretName }}
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mysql.secretName }}
+                  key: MYSQL_DATABASE
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+            - name: mysql-initdb
+              mountPath: /docker-entrypoint-initdb.d
+          resources:
+            requests:
+              memory: {{ .Values.mysql.resources.requests.memory }}
+              cpu: {{ .Values.mysql.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.mysql.resources.limits.memory }}
+              cpu: {{ .Values.mysql.resources.limits.cpu }}
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: {{ .Values.mysql.pvcName }}       # Templated PVC name
+        - name: mysql-initdb
+          configMap:
+            name: {{ .Values.mysql.configMapName }}      # Templated ConfigMap name
+
+
+      # Node affinity to enforce MySQL runs only on the database node
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "type"
+                operator: In
+                values:
+                - database
+---
+# MySQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service            # Name of the service
+  namespace: {{ .Values.namespace }}  # Templated namespace
+spec:
+  ports:
+    - port: 3306                # Port to expose MySQL
+      targetPort: 3306          # Port MySQL listens on inside the container
+  selector:
+    app: mysql                  # Select the MySQL pods using this label
+  type: ClusterIP               # Type of service (ClusterIP is default, NodePort if external access is needed)
