@@ -57,6 +57,24 @@ spec:
             limits:
               memory: {{ .Values.app.initContainer.resources.limits.memory }}  # Templated resource limits for init container
               cpu: {{ .Values.app.initContainer.resources.limits.cpu }}
+
+      # Tolerations for scheduling on the application node
+      tolerations:
+      - key: "application"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+
+      # Node affinity to ensure pod runs on the application node
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "type"
+                operator: In
+                values:
+                - application  # Ensures scheduling on application node
 ---
 # Flask App Service
 apiVersion: v1
