@@ -21,3 +21,4 @@ env
 .DS_Store
 portforward.log
 .dockerconfigjson
+vault-tokens
