@@ -16,6 +16,10 @@ VENV_DIR = venv  # Virtual environment directory..
 # Define a default DB_HOST that can be overridden
 DB_HOST ?= 127.0.0.1
 
+# Print the current TAG (useful for CI/CD pipelines to extract the version)
+print_version:
+	@echo $(TAG)
+
 # Ensure the .env file contains necessary variables..
 check_env:
 	@if [ ! -f ".env" ]; then \
