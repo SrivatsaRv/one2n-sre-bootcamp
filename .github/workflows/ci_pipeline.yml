@@ -81,9 +81,14 @@ jobs:
 
       - name: Update image tag in values.yaml
         run: |
-          sed -i '' "s/image: srivatsarv21\/one2n-bootcamp:[^ ]*/image: srivatsarv21\/one2n-bootcamp:${TAG}/g" prod-app/values.yaml
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' "s/image: srivatsarv21\/one2n-bootcamp:[^ ]*/image: srivatsarv21\/one2n-bootcamp:${TAG}/g" milestone-9-argocd-setup/prod-app/values.yaml
+          else
+            sed -i "s/image: srivatsarv21\/one2n-bootcamp:[^ ]*/image: srivatsarv21\/one2n-bootcamp:${TAG}/g" milestone-9-argocd-setup/prod-app/values.yaml
+          fi
         env:
           TAG: ${{ env.TAG }}
+      
       
 
       # Commit and push the updated values.yaml
