@@ -6,18 +6,18 @@ metadata:
 spec:
   source:
     repoURL: https://github.com/SrivatsaRv/one2n-sre-bootcamp/  # Your Git repository
-    targetRevision: milestone-9/argocd-setup
+    targetRevision: main
     path: milestone-9-argocd-setup/prod-app # Path to your Helm chart
     helm:
       valueFiles:
-        - values.yml               # Reference to your values.yaml file
+        - values.yaml               # Reference to your values.yaml file
 
   project: default
 
   destination:
     name: ''
     namespace: student-api   # Specify your target namespace here
-    server: https://kubernetes.default.svc  
+    server: https://kubernetes.default.svc      
 
   syncPolicy:
     automated:
