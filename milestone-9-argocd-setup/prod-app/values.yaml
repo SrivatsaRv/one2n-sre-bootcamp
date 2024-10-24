@@ -1,6 +1,5 @@
 # Namespace for both Vault SecretStore and ExternalSecret
-namespace: student-api  
-
+namespace: student-api
 # --- Vault SecretStore Configuration ---
 vault:
   server: "http://vault.vault.svc.cluster.local:8200"
@@ -8,59 +7,51 @@ vault:
   version: "v1"
   tokenSecretName: "vault-token"
   tokenSecretKey: "token"
-
 # --- ExternalSecret Configuration ---
 externalSecret:
-  name: db-credentials            # Name of the ExternalSecret resource
-  targetName: mysql-secret         # Name of the Kubernetes Secret to be created
-  refreshInterval: "1h"            # How often secrets are synced from Vault
+  name: db-credentials # Name of the ExternalSecret resource
+  targetName: mysql-secret # Name of the Kubernetes Secret to be created
+  refreshInterval: "1h" # How often secrets are synced from Vault
   # --- Vault Secrets Information ---
   mysqlRootPassword:
-    key: "secret/mysql-root-password"    # Vault path for MySQL root password
-    property: "password"                 # Vault property (field) to fetch
+    key: "secret/mysql-root-password" # Vault path for MySQL root password
+    property: "password" # Vault property (field) to fetch
   mysqlDatabase:
-    key: "secret/mysql-database"         # Vault path for MySQL database name
-    property: "name"                     # Vault property (field) to fetch
+    key: "secret/mysql-database" # Vault path for MySQL database name
+    property: "name" # Vault property (field) to fetch
   mysqlUrl:
-    key: "secret/mysql-url"              # Vault path for MySQL URL
-    property: "url"                      # Vault property (field) to fetch
+    key: "secret/mysql-url" # Vault path for MySQL URL
+    property: "url" # Vault property (field) to fetch
   dockerhubConfig:
-    key: "secret/dockerhub-config"       # Vault path for DockerHub config
-    property: ".dockerconfigjson"         # Vault property (field) for DockerHub credentials
-
+    key: "secret/dockerhub-config" # Vault path for DockerHub config
+    property: ".dockerconfigjson" # Vault property (field) for DockerHub credentials
 # --- MySQL Configuration ---
 mysql:
-  image: "mysql:8.0"                     # MySQL image version
-  replicaCount: 1                        # Number of MySQL replicas
-  secretName: mysql-secret               # Name of the Kubernetes Secret holding MySQL credentials
-
-  pvcName: mysql-pvc                     # Name of the PersistentVolumeClaim for MySQL
-  configMapName: mysql-initdb-config      # Name of the ConfigMap for initializing MySQL database
-
+  image: "mysql:8.0" # MySQL image version
+  replicaCount: 1 # Number of MySQL replicas
+  secretName: mysql-secret # Name of the Kubernetes Secret holding MySQL credentials
+  pvcName: mysql-pvc # Name of the PersistentVolumeClaim for MySQL
+  configMapName: mysql-initdb-config # Name of the ConfigMap for initializing MySQL database
   persistence:
-    size: 1Gi                            # Persistent volume size for MySQL
-
+    size: 1Gi # Persistent volume size for MySQL
   initdbConfig:
     initSql: |
       CREATE DATABASE IF NOT EXISTS student_db;   # SQL script to create the database
-
   resources:
     requests:
-      memory: "512Mi"                     # Memory request for MySQL container
-      cpu: "500m"                         # CPU request for MySQL container
+      memory: "512Mi" # Memory request for MySQL container
+      cpu: "500m" # CPU request for MySQL container
     limits:
-      memory: "1Gi"                       # Memory limit for MySQL container
-      cpu: "1"                            # CPU limit for MySQL container
-
+      memory: "1Gi" # Memory limit for MySQL container
+      cpu: "1" # CPU limit for MySQL container
 # --- Flask App Configuration ---
 app:
-  name: flask-app  # App name
-  replicaCount: 1  # Number of replicas for the Flask app
-  image: "srivatsarv21/one2n-bootcamp:6.1.0"  # Docker image for Flask app
-  imagePullSecret: "mysql-secret"  # DockerHub credentials secret
-  containerPort: 5000  # Flask app listening port
-  secretName: "mysql-secret"  # Name of the secret to pull DB_URL from
-
+  name: flask-app # App name
+  replicaCount: 1 # Number of replicas for the Flask app
+  image: "srivatsarv21/one2n-bootcamp:9.0.0" # Docker image for Flask app
+  imagePullSecret: "mysql-secret" # DockerHub credentials secret
+  containerPort: 5000 # Flask app listening port
+  secretName: "mysql-secret" # Name of the secret to pull DB_URL from
   resources:
     requests:
       memory: "512Mi"
@@ -68,7 +59,6 @@ app:
     limits:
       memory: "1Gi"
       cpu: "1"
-
   initContainer:
     resources:
       requests:
@@ -77,6 +67,5 @@ app:
       limits:
         memory: "256Mi"
         cpu: "500m"
-
-  serviceType: ClusterIP  # Type of service (ClusterIP or NodePort)
-  servicePort: 5000  # Port exposed by the service
+  serviceType: ClusterIP # Type of service (ClusterIP or NodePort)
+  servicePort: 5000 # Port exposed by the service
