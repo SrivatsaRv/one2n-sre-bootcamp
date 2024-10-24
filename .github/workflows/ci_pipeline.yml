@@ -82,8 +82,9 @@ jobs:
       # Update image tag in values.yaml using TAG from Makefile
       - name: Update image tag in values.yaml
         run: |
-        sed -i "s/image: srivatsarv21\/one2n-bootcamp:[^ ]*/image: srivatsarv21\/one2n-bootcamp:${{ env.TAG }}/g" prod-app/values.yaml
-        working-directory: ./milestone-9-argocd-setup
+          sed -i "s/image: srivatsarv21\/one2n-bootcamp:[^ ]*/image: srivatsarv21\/one2n-bootcamp:${TAG}/g" prod-app/values.yaml
+        env:
+          TAG: ${{ env.TAG }}
 
       # Commit and push the updated values.yaml
       - name: Commit and push updated values.yaml
