@@ -86,6 +86,8 @@ jobs:
           else
             sed -i "s/image: srivatsarv21\/one2n-bootcamp:[^ ]*/image: srivatsarv21\/one2n-bootcamp:${TAG}/g" milestone-9-argocd-setup/prod-app/values.yaml
           fi
+          # Debug: Print contents of values.yaml to confirm changes
+          cat milestone-9-argocd-setup/prod-app/values.yaml
         env:
           TAG: ${{ env.TAG }}
       
