@@ -82,7 +82,7 @@ jobs:
       # Update image tag in values.yaml using TAG from Makefile
       - name: Update image tag in values.yaml
         run: |
-          sed -i 's/image: srivatsarv21\/one2n-bootcamp:[^ ]*/image: srivatsarv21\/one2n-bootcamp:$GITHUB_ENV' prod-app/values.yaml
+          sed -i 's/image: srivatsarv21\/one2n-bootcamp:[^ ]*/image: srivatsarv21\/one2n-bootcamp:${{ env.TAG }}/g' prod-app/values.yaml
         working-directory: ./milestone-9-argocd-setup
 
       # Commit and push the updated values.yaml
@@ -91,5 +91,5 @@ jobs:
           git config --local user.email "srivatsa.rv@one2n.in"
           git config --local user.name "srivatsa.rv"
           git add milestone-9-argocd-setup/prod-app/values.yaml
-          git commit -m "Updated image tag to srivatsarv21/one2n-bootcamp:$GITHUB_ENV"
+          git commit -m "Updated image tag to srivatsarv21/one2n-bootcamp:${{ env.TAG }}"
           git push
