@@ -5,11 +5,6 @@ metadata:
   name: helm-cluster-m02
   labels:
     type: application
-spec:
-  taints:
-  - key: "application"
-    value: "true"
-    effect: "NoSchedule"
 ---
 # Node B (Database)
 apiVersion: v1
@@ -18,11 +13,6 @@ metadata:
   name: helm-cluster-m03
   labels:
     type: database
-spec:
-  taints:
-  - key: "database"
-    value: "true"
-    effect: "NoSchedule"
 ---
 # Node C (Dependent Services)
 apiVersion: v1
@@ -31,8 +21,3 @@ metadata:
   name: helm-cluster-m04
   labels:
     type: dependent-services
-spec:
-  taints:
-  - key: "dependent-services"
-    value: "true"
-    effect: "NoSchedule"
